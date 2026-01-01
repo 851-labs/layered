@@ -6,5 +6,11 @@ export default defineNitroConfig({
   cloudflare: {
     deployConfig: true,
     nodeCompat: true,
+    wrangler: {
+      observability: {
+        enabled: true,
+        head_sampling_rate: 1.0,
+      },
+    },
   },
 })
