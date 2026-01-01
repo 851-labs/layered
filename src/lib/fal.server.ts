@@ -1,16 +1,19 @@
 import { createServerFn } from "@tanstack/react-start"
-import { fal } from "@fal-ai/client"
+import { createFalClient } from "@fal-ai/client"
 
-// Configure fal client with API key from environment
-fal.config({
-  credentials: () => {
+// Lazy initialization - only create client when needed (during request lifecycle)
+let falClient: ReturnType<typeof createFalClient> | null = null
+
+function getFalClient() {
+  if (!falClient) {
     const key = process.env.FAL_KEY
     if (!key) {
       throw new Error("FAL_KEY environment variable is not set")
     }
-    return key
-  },
-})
+    falClient = createFalClient({ credentials: key })
+  }
+  return falClient
+}
 
 export type LayerResult = {
   layers: Array<{
@@ -45,6 +48,7 @@ export const uploadImage = createServerFn({ method: "POST" })
     const blob = new Blob([bytes], { type: contentType })
 
     // Upload to fal storage
+    const fal = getFalClient()
     const url = await fal.storage.upload(blob)
 
     return { url }
@@ -58,6 +62,7 @@ export const decomposeImage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { imageUrl } = data
 
+    const fal = getFalClient()
     const result = await fal.subscribe("fal-ai/qwen-image-layered", {
       input: {
         image_url: imageUrl,
