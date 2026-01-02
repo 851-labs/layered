@@ -4,37 +4,122 @@ import { Upload, Loader2, AlertCircle } from "lucide-react"
 
 import { uploadImage, decomposeImage } from "../lib/fal"
 
+type ExampleCardProps = {
+  example: { id: string; input: string; layers: string[] }
+  hasBorderRight: boolean
+}
+
+function ExampleCard({ example, hasBorderRight }: ExampleCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`
+        aspect-square relative overflow-hidden
+        border-b border-stone-200
+        ${hasBorderRight ? "border-r" : ""}
+      `}
+      style={{ perspective: "900px" }}
+    >
+      <div
+        className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-out"
+        style={{
+          transformStyle: "preserve-3d",
+          transform: isHovered
+            ? "rotateY(0deg) rotateX(0deg) rotateZ(0deg)"
+            : "rotateY(25deg) rotateX(0deg) rotateY(30deg)",
+        }}
+      >
+        {example.layers.map((layer, layerIndex) => {
+          const spacing = 15
+          const depthSpacing = 40
+          const depth = isHovered ? 0 : layerIndex * depthSpacing
+          const xOffset = isHovered ? 0 : layerIndex * spacing
+
+          return (
+            <img
+              key={layerIndex}
+              src={layer}
+              alt={`Layer ${layerIndex + 1}`}
+              draggable={false}
+              className="absolute select-none object-contain transition-all duration-500 ease-out"
+              style={{
+                width: isHovered ? "100%" : "55%",
+                height: isHovered ? "100%" : "55%",
+                transform: `translateZ(${depth}px) translateX(${xOffset}px) rotateY(0deg)`,
+                boxShadow: isHovered ? "none" : "0 4px 20px rgba(0, 0, 0, 0.15)",
+              }}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // Example images to showcase (6 examples for the 3x2 grid)
 const EXAMPLES = [
   {
     id: "1",
-    input: "/examples/example-1.png",
-    layers: ["/examples/example-1-layer-0.png", "/examples/example-1-layer-1.png", "/examples/example-1-layer-2.png"],
+    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    layers: [
+      "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
+      "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
+      "https://replicate.delivery/xezq/4q0uoz3ioWprNV1UyvP4rQSwOKQW3hUD5aAmc1UCS1ae6Z6KA/out-2.webp",
+      "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
+    ],
   },
   {
     id: "2",
-    input: "/examples/example-2.png",
-    layers: ["/examples/example-2-layer-0.png", "/examples/example-2-layer-1.png"],
+    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    layers: [
+      "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
+      "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
+      "https://replicate.delivery/xezq/4q0uoz3ioWprNV1UyvP4rQSwOKQW3hUD5aAmc1UCS1ae6Z6KA/out-2.webp",
+      "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
+    ],
   },
   {
     id: "3",
-    input: "/examples/example-3.png",
-    layers: ["/examples/example-3-layer-0.png", "/examples/example-3-layer-1.png", "/examples/example-3-layer-2.png"],
+    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    layers: [
+      "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
+      "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
+      "https://replicate.delivery/xezq/4q0uoz3ioWprNV1UyvP4rQSwOKQW3hUD5aAmc1UCS1ae6Z6KA/out-2.webp",
+      "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
+    ],
   },
   {
     id: "4",
-    input: "/examples/example-4.png",
-    layers: ["/examples/example-4-layer-0.png", "/examples/example-4-layer-1.png"],
+    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    layers: [
+      "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
+      "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
+      "https://replicate.delivery/xezq/4q0uoz3ioWprNV1UyvP4rQSwOKQW3hUD5aAmc1UCS1ae6Z6KA/out-2.webp",
+      "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
+    ],
   },
   {
     id: "5",
-    input: "/examples/example-5.png",
-    layers: ["/examples/example-5-layer-0.png", "/examples/example-5-layer-1.png", "/examples/example-5-layer-2.png"],
+    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    layers: [
+      "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
+      "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
+      "https://replicate.delivery/xezq/4q0uoz3ioWprNV1UyvP4rQSwOKQW3hUD5aAmc1UCS1ae6Z6KA/out-2.webp",
+      "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
+    ],
   },
   {
     id: "6",
-    input: "/examples/example-6.png",
-    layers: ["/examples/example-6-layer-0.png", "/examples/example-6-layer-1.png"],
+    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    layers: [
+      "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
+      "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
+      "https://replicate.delivery/xezq/4q0uoz3ioWprNV1UyvP4rQSwOKQW3hUD5aAmc1UCS1ae6Z6KA/out-2.webp",
+      "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
+    ],
   },
 ]
 
@@ -80,11 +165,6 @@ function App() {
     },
     [navigate]
   )
-
-  const handleExampleClick = (example: (typeof EXAMPLES)[0]) => {
-    // TODO: Examples could navigate to pre-generated pages
-    console.log("Example clicked:", example.id)
-  }
 
   const handleUploadClick = () => {
     const input = document.createElement("input")
@@ -149,22 +229,7 @@ function App() {
         {/* Examples Grid - 3 columns x 2 rows */}
         <div className="grid grid-cols-3">
           {EXAMPLES.map((example, index) => (
-            <button
-              key={example.id}
-              onClick={() => handleExampleClick(example)}
-              className={`
-                aspect-square relative group
-                border-b border-stone-200
-                ${index % 3 !== 2 ? "border-r" : ""}
-                hover:bg-stone-100/50 transition-colors
-              `}
-            >
-              {/* Placeholder X pattern */}
-              <svg className="w-full h-full text-stone-200" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" strokeWidth="1" />
-                <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" strokeWidth="1" />
-              </svg>
-            </button>
+            <ExampleCard key={example.id} example={example} hasBorderRight={index % 3 !== 2} />
           ))}
         </div>
       </div>

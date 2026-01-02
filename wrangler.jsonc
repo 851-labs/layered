@@ -20,4 +20,10 @@
     "binding": "AI",
     "remote": true,
   },
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "layered",
+    },
+  ],
 }

@@ -5,4 +5,3 @@ declare namespace Cloudflare {
     CF_AIG_TOKEN: string
   }
 }
-
