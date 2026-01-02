@@ -1,13 +1,15 @@
-import { createServerFn } from "@tanstack/react-start"
 import { createFalClient } from "@fal-ai/client"
+import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
 
-import { db } from "./db"
 import { desc } from "drizzle-orm"
+import { db } from "./db"
 import { generations } from "./db/schema"
 
-async function getFalClient() {
-  return createFalClient({ proxyUrl: await env.AI.gateway("layered").getUrl("fal") })
+function getFalClient() {
+  return createFalClient({
+    credentials: env.FAL_KEY,
+  })
 }
 
 // Generate a simple unique ID
@@ -122,4 +124,4 @@ const getGenerations = createServerFn({ method: "GET" }).handler(async () => {
   }
 })
 
-export { LayerResult, uploadImage, decomposeImage, getGenerations }
+export { decomposeImage, getGenerations, LayerResult, uploadImage }
