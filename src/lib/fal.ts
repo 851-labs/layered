@@ -2,19 +2,15 @@ import { createFalClient } from "@fal-ai/client"
 import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
 
-import { desc } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { db } from "./db"
 import { generations } from "./db/schema"
+import { generateId } from "./uuid"
 
 function getFalClient() {
   return createFalClient({
     credentials: env.FAL_KEY,
   })
-}
-
-// Generate a simple unique ID
-function generateId(): string {
-  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
 }
 
 type LayerResult = {
@@ -50,7 +46,7 @@ const uploadImage = createServerFn({ method: "POST" })
     const blob = new Blob([bytes], { type: contentType })
 
     // Upload to fal storage
-    const fal = await getFalClient()
+    const fal = getFalClient()
     const url = await fal.storage.upload(blob)
 
     return { url }
@@ -64,7 +60,7 @@ const decomposeImage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { imageUrl } = data
 
-    const fal = await getFalClient()
+    const fal = getFalClient()
     const result = await fal.subscribe("fal-ai/qwen-image-layered", {
       input: {
         image_url: imageUrl,
@@ -85,19 +81,17 @@ const decomposeImage = createServerFn({ method: "POST" })
       throw new Error("No layers returned from the model")
     }
 
-    try {
-      await db.insert(generations).values({
-        id: generateId(),
-        inputUrl: imageUrl,
-        layers: JSON.stringify(layers.map((l) => l.url)),
-        createdAt: new Date(),
-      })
-      console.log("Saved generation to database")
-    } catch (err) {
-      console.error("Failed to save generation:", err)
-    }
+    const id = generateId()
+    await db.insert(generations).values({
+      id,
+      inputUrl: imageUrl,
+      layers: JSON.stringify(layers.map((l) => l.url)),
+      createdAt: new Date(),
+    })
+    console.log("Saved generation to database:", id)
 
     return {
+      id,
       layers,
       requestId: result.requestId,
     }
@@ -124,4 +118,28 @@ const getGenerations = createServerFn({ method: "GET" }).handler(async () => {
   }
 })
 
-export { decomposeImage, getGenerations, LayerResult, uploadImage }
+type GetGenerationInput = {
+  id: string
+}
+
+/**
+ * Get a single generation by ID
+ */
+const getGeneration = createServerFn({ method: "GET" })
+  .inputValidator((input: GetGenerationInput) => input)
+  .handler(async ({ data }) => {
+    const result = await db.select().from(generations).where(eq(generations.id, data.id)).get()
+
+    if (!result) {
+      throw new Error("Generation not found")
+    }
+
+    return {
+      id: result.id,
+      inputUrl: result.inputUrl,
+      layers: JSON.parse(result.layers) as string[],
+      createdAt: result.createdAt,
+    }
+  })
+
+export { decomposeImage, getGeneration, getGenerations, LayerResult, uploadImage }

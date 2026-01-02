@@ -1,16 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState, useCallback } from "react"
-import { Upload, Loader2, AlertCircle, X } from "lucide-react"
+import { Upload, Loader2, AlertCircle } from "lucide-react"
 
-import { LayerViewer3D } from "../components/layer-viewer-3d"
-import { LayerPanel } from "../components/layer-panel"
 import { uploadImage, decomposeImage } from "../lib/fal"
-
-type LayerState = {
-  url: string
-  visible: boolean
-  opacity: number
-}
 
 // Example images to showcase (6 examples for the 3x2 grid)
 const EXAMPLES = [
@@ -47,65 +39,51 @@ const EXAMPLES = [
 ]
 
 function App() {
-  const [layers, setLayers] = useState<LayerState[]>([])
+  const navigate = useNavigate()
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showResults, setShowResults] = useState(false)
 
-  const handleImageSelected = useCallback(async (file: File) => {
-    setIsProcessing(true)
-    setError(null)
-    setLayers([])
+  const handleImageSelected = useCallback(
+    async (file: File) => {
+      setIsProcessing(true)
+      setError(null)
 
-    try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          const result = reader.result as string
-          const base64Data = result.split(",")[1]
-          resolve(base64Data)
+      try {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => {
+            const result = reader.result as string
+            const base64Data = result.split(",")[1]
+            resolve(base64Data)
+          }
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+
+        const { url } = await uploadImage({
+          data: { base64, contentType: file.type },
+        })
+
+        const result = await decomposeImage({ data: { imageUrl: url } })
+
+        if (!result.layers || result.layers.length === 0) {
+          throw new Error("No layers were extracted from the image")
         }
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
 
-      const { url } = await uploadImage({
-        data: { base64, contentType: file.type },
-      })
-
-      const result = await decomposeImage({ data: { imageUrl: url } })
-
-      const resultLayers = result.layers || []
-      if (resultLayers.length === 0) {
-        throw new Error("No layers were extracted from the image")
+        // Navigate to the generation page
+        navigate({ to: "/g/$id", params: { id: result.id } })
+      } catch (err) {
+        console.error("Processing failed:", err)
+        setError(err instanceof Error ? err.message : "Failed to process image")
+        setIsProcessing(false)
       }
-
-      setLayers(
-        resultLayers.map((layer) => ({
-          url: layer.url,
-          visible: true,
-          opacity: 1,
-        }))
-      )
-      setShowResults(true)
-    } catch (err) {
-      console.error("Processing failed:", err)
-      setError(err instanceof Error ? err.message : "Failed to process image")
-    } finally {
-      setIsProcessing(false)
-    }
-  }, [])
+    },
+    [navigate]
+  )
 
   const handleExampleClick = (example: (typeof EXAMPLES)[0]) => {
-    setLayers(
-      example.layers.map((url) => ({
-        url,
-        visible: true,
-        opacity: 1,
-      }))
-    )
-    setShowResults(true)
-    setError(null)
+    // TODO: Examples could navigate to pre-generated pages
+    console.log("Example clicked:", example.id)
   }
 
   const handleUploadClick = () => {
@@ -117,60 +95,6 @@ function App() {
       if (file) handleImageSelected(file)
     }
     input.click()
-  }
-
-  const handleClose = () => {
-    setShowResults(false)
-    setLayers([])
-  }
-
-  const handleToggleVisibility = useCallback((index: number) => {
-    setLayers((prev) => prev.map((layer, i) => (i === index ? { ...layer, visible: !layer.visible } : layer)))
-  }, [])
-
-  const handleOpacityChange = useCallback((index: number, opacity: number) => {
-    setLayers((prev) => prev.map((layer, i) => (i === index ? { ...layer, opacity } : layer)))
-  }, [])
-
-  const handleSolo = useCallback((index: number) => {
-    setLayers((prev) =>
-      prev.map((layer, i) => ({
-        ...layer,
-        visible: i === index,
-        opacity: i === index ? 1 : layer.opacity,
-      }))
-    )
-  }, [])
-
-  // Results overlay
-  if (showResults && layers.length > 0) {
-    return (
-      <div className="min-h-screen bg-stone-50">
-        <div className="max-w-[1400px] mx-auto border-x border-stone-200">
-          {/* Close button */}
-          <div className="flex justify-end p-4 border-b border-stone-200">
-            <button onClick={handleClose} className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
-              <X className="w-5 h-5 text-stone-500" />
-            </button>
-          </div>
-
-          {/* 3D Viewer */}
-          <div className="aspect-video border-b border-stone-200 bg-stone-100/50">
-            <LayerViewer3D layers={layers} className="w-full h-full" />
-          </div>
-
-          {/* Layer Controls */}
-          <div className="p-6">
-            <LayerPanel
-              layers={layers}
-              onToggleVisibility={handleToggleVisibility}
-              onOpacityChange={handleOpacityChange}
-              onSolo={handleSolo}
-            />
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (
