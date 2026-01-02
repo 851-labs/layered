@@ -1,12 +1,17 @@
 import { createServerFn } from "@tanstack/react-start"
 import { createFalClient } from "@fal-ai/client"
+import { env } from "cloudflare:workers"
+
+import { db } from "./db"
+import { desc } from "drizzle-orm"
+import { generations } from "./db/schema"
 
 // Lazy initialization - only create client when needed (during request lifecycle)
 let falClient: ReturnType<typeof createFalClient> | null = null
 
 function getFalClient() {
   if (!falClient) {
-    const key = process.env.FAL_KEY
+    const key = env.FAL_KEY
     if (!key) {
       throw new Error("FAL_KEY environment variable is not set")
     }
@@ -15,7 +20,12 @@ function getFalClient() {
   return falClient
 }
 
-export type LayerResult = {
+// Generate a simple unique ID
+function generateId(): string {
+  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
+}
+
+type LayerResult = {
   layers: Array<{
     url: string
     content_type: string
@@ -34,7 +44,7 @@ type DecomposeInput = {
 /**
  * Upload an image to fal.ai storage and get a URL back
  */
-export const uploadImage = createServerFn({ method: "POST" })
+const uploadImage = createServerFn({ method: "POST" })
   .inputValidator((input: UploadInput) => input)
   .handler(async ({ data }) => {
     const { base64, contentType } = data
@@ -57,7 +67,7 @@ export const uploadImage = createServerFn({ method: "POST" })
 /**
  * Process an image through qwen-image-layered model
  */
-export const decomposeImage = createServerFn({ method: "POST" })
+const decomposeImage = createServerFn({ method: "POST" })
   .inputValidator((input: DecomposeInput) => input)
   .handler(async ({ data }) => {
     const { imageUrl } = data
@@ -83,8 +93,43 @@ export const decomposeImage = createServerFn({ method: "POST" })
       throw new Error("No layers returned from the model")
     }
 
+    try {
+      await db.insert(generations).values({
+        id: generateId(),
+        inputUrl: imageUrl,
+        layers: JSON.stringify(layers.map((l) => l.url)),
+        createdAt: new Date(),
+      })
+      console.log("Saved generation to database")
+    } catch (err) {
+      console.error("Failed to save generation:", err)
+    }
+
     return {
       layers,
       requestId: result.requestId,
     }
   })
+
+/**
+ * Get recent generations from the database
+ */
+const getGenerations = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const results = await db.select().from(generations).orderBy(desc(generations.createdAt)).limit(6)
+
+    return {
+      generations: results.map((g) => ({
+        id: g.id,
+        inputUrl: g.inputUrl,
+        layers: JSON.parse(g.layers) as string[],
+        createdAt: g.createdAt,
+      })),
+    }
+  } catch (err) {
+    console.error("Failed to fetch generations:", err)
+    return { generations: [] }
+  }
+})
+
+export { LayerResult, uploadImage, decomposeImage, getGenerations }

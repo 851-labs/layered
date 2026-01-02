@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { Github } from "lucide-react"
 
-export default function Header() {
+function Header() {
   return (
     <header className="h-14 border-b border-stone-200/60 bg-stone-50/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="h-full max-w-[1400px] mx-auto px-6 flex items-center justify-between">
@@ -22,3 +22,5 @@ export default function Header() {
     </header>
   )
 }
+
+export { Header }

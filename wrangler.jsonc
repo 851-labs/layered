@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "layered",
+  "compatibility_date": "2026-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1.0,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "layered",
+      "database_id": "56e7df3a-df01-4881-b00d-05ad0a9012ff",
+      "migrations_dir": "drizzle/migrations",
+    },
+  ],
+}

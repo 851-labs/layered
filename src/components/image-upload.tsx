@@ -7,7 +7,7 @@ type ImageUploadProps = {
   disabled?: boolean
 }
 
-export function ImageUpload({ onImageSelected, isUploading = false, disabled = false }: ImageUploadProps) {
+function ImageUpload({ onImageSelected, isUploading = false, disabled = false }: ImageUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
 
@@ -152,3 +152,5 @@ export function ImageUpload({ onImageSelected, isUploading = false, disabled = f
     </div>
   )
 }
+
+export { ImageUpload }

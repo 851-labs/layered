@@ -1,10 +1,10 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
 
-import Header from "../components/header"
+import { Header } from "../components/header"
 
 import appCss from "../styles.css?url"
 
-export const Route = createRootRoute({
+const Route = createRootRoute({
   head: () => ({
     meta: [
       {
@@ -60,3 +60,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     </html>
   )
 }
+
+export { Route }

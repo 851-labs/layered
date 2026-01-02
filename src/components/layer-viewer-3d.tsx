@@ -12,7 +12,7 @@ type LayerViewer3DProps = {
   className?: string
 }
 
-export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
+function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [rotation, setRotation] = useState({ x: 15, y: -25 })
   const [isDragging, setIsDragging] = useState(false)
@@ -130,3 +130,5 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
     </div>
   )
 }
+
+export { LayerViewer3D }

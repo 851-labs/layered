@@ -6,8 +6,6 @@ import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
 import { uploadImage, decomposeImage } from "../lib/fal.server"
 
-export const Route = createFileRoute("/")({ component: App })
-
 type LayerState = {
   url: string
   visible: boolean
@@ -249,3 +247,7 @@ function App() {
     </div>
   )
 }
+
+const Route = createFileRoute("/")({ component: App })
+
+export { Route }

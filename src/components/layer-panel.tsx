@@ -13,7 +13,7 @@ type LayerPanelProps = {
   onSolo: (index: number) => void
 }
 
-export function LayerPanel({
+function LayerPanel({
   layers,
   onToggleVisibility,
   onOpacityChange,
@@ -109,3 +109,5 @@ export function LayerPanel({
     </div>
   )
 }
+
+export { LayerPanel }
