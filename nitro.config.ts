@@ -11,6 +11,7 @@ export default defineNitroConfig({
         enabled: true,
         head_sampling_rate: 1.0,
       },
+      d1_databases: [{ binding: "DB", database_name: "layered", database_id: "56e7df3a-df01-4881-b00d-05ad0a9012ff" }],
     },
   },
 })
