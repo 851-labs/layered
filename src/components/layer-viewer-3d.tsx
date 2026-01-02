@@ -19,11 +19,12 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [spread, setSpread] = useState(0)
 
-  // Animate spread on mount
+  // Animate spread on mount and when layers change
   useEffect(() => {
+    setSpread(0)
     const timer = setTimeout(() => setSpread(1), 100)
     return () => clearTimeout(timer)
-  }, [])
+  }, [layers])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
@@ -57,7 +58,7 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
   }
 
   const visibleLayers = layers.filter((l) => l.visible)
-  const layerSpacing = 60 * spread
+  const layerSpacing = 50 * spread
 
   return (
     <div className={`relative ${className}`}>
@@ -65,17 +66,17 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <button
           onClick={resetRotation}
-          className="p-2 bg-zinc-800/80 hover:bg-zinc-700 rounded-lg transition-colors"
+          className="p-2.5 bg-white/90 hover:bg-white rounded-lg transition-colors shadow-sm border border-stone-200/60"
           title="Reset view"
         >
-          <RotateCcw className="w-4 h-4 text-zinc-400" />
+          <RotateCcw className="w-4 h-4 text-stone-600" />
         </button>
       </div>
 
       {/* Drag hint */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 text-xs text-zinc-500">
-        <Move className="w-3 h-3" />
-        <span>Drag to rotate</span>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 rounded-full shadow-sm border border-stone-200/60">
+        <Move className="w-3 h-3 text-stone-400" />
+        <span className="text-xs text-stone-500">Drag to rotate</span>
       </div>
 
       {/* 3D Scene */}
@@ -86,7 +87,7 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         className={`
-          w-full aspect-[4/3] flex items-center justify-center
+          w-full h-full min-h-[300px] flex items-center justify-center
           cursor-grab select-none
           ${isDragging ? "cursor-grabbing" : ""}
         `}
@@ -115,9 +116,9 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
                 <img
                   src={layer.url}
                   alt={`Layer ${index + 1}`}
-                  className="max-w-[400px] max-h-[300px] w-auto h-auto rounded-lg shadow-2xl"
+                  className="max-w-[320px] max-h-[280px] w-auto h-auto rounded-lg"
                   style={{
-                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                    boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.2)",
                   }}
                   draggable={false}
                 />
@@ -129,4 +130,3 @@ export function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
     </div>
   )
 }
-
