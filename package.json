@@ -9,7 +9,9 @@
     "deploy": "bun run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "test": "vitest run",
-    "db:studio": "drizzle-kit studio"
+    "db:migrations:generate": "drizzle-kit generate",
+    "db:migrations:list": "wrangler d1 migrations list DB --remote",
+    "db:migrations:apply": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.17.1",
