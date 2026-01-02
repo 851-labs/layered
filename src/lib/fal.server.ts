@@ -6,18 +6,8 @@ import { db } from "./db"
 import { desc } from "drizzle-orm"
 import { generations } from "./db/schema"
 
-// Lazy initialization - only create client when needed (during request lifecycle)
-let falClient: ReturnType<typeof createFalClient> | null = null
-
-function getFalClient() {
-  if (!falClient) {
-    const key = env.FAL_KEY
-    if (!key) {
-      throw new Error("FAL_KEY environment variable is not set")
-    }
-    falClient = createFalClient({ credentials: key })
-  }
-  return falClient
+async function getFalClient() {
+  return createFalClient({ proxyUrl: await env.AI.gateway("layered").getUrl("fal") })
 }
 
 // Generate a simple unique ID
@@ -58,7 +48,7 @@ const uploadImage = createServerFn({ method: "POST" })
     const blob = new Blob([bytes], { type: contentType })
 
     // Upload to fal storage
-    const fal = getFalClient()
+    const fal = await getFalClient()
     const url = await fal.storage.upload(blob)
 
     return { url }
@@ -72,7 +62,7 @@ const decomposeImage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { imageUrl } = data
 
-    const fal = getFalClient()
+    const fal = await getFalClient()
     const result = await fal.subscribe("fal-ai/qwen-image-layered", {
       input: {
         image_url: imageUrl,
