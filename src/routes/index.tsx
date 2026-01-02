@@ -4,7 +4,7 @@ import { Upload, Loader2, AlertCircle, X } from "lucide-react"
 
 import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
-import { uploadImage, decomposeImage } from "../lib/fal.server"
+import { uploadImage, decomposeImage } from "../lib/fal"
 
 type LayerState = {
   url: string
