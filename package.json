@@ -8,7 +8,6 @@
     "preview": "vite preview",
     "deploy": "bun run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "postinstall": "bun cf-typegen",
     "test": "vitest run",
     "db:studio": "drizzle-kit studio"
   },
