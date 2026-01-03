@@ -12,3 +12,4 @@ type NewGeneration = typeof generations.$inferInsert
 
 export { generations }
 export type { Generation, NewGeneration }
+

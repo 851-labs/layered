@@ -1,7 +1,7 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers"
 import { eq } from "drizzle-orm"
-import { generations } from "@layered/db/schema"
-import { db } from "./lib/db"
+import { generations } from "../lib/db/schema"
+import { db } from "../lib/db"
 
 type Params = {
   generationId: string

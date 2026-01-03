@@ -4,8 +4,8 @@ import { env } from "cloudflare:workers"
 
 import { desc, eq } from "drizzle-orm"
 import { db } from "./db"
-import { generations } from "@layered/db/schema"
-import { generateId } from "@layered/utils/uuid"
+import { generations } from "./db/schema"
+import { generateId } from "./uuid"
 
 function getFalClient() {
   return createFalClient({

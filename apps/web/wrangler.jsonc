@@ -3,7 +3,7 @@
   "name": "layered",
   "compatibility_date": "2025-12-10",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "src/server.ts",
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1.0
@@ -30,8 +30,7 @@
     {
       "name": "upload-generation-layers-workflow",
       "binding": "UPLOAD_GENERATION_LAYERS_WORKFLOW",
-      "class_name": "UploadGenerationLayersWorkflow",
-      "script_name": "layered-workflows"
+      "class_name": "UploadGenerationLayersWorkflow"
     }
   ]
 }

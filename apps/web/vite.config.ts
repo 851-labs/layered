@@ -11,7 +11,6 @@ const config = defineConfig({
     devtools(),
     cloudflare({
       viteEnvironment: { name: "ssr" },
-      auxiliaryWorkers: [{ configPath: "../workflows/wrangler.jsonc" }],
     }),
     viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
