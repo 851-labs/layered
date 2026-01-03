@@ -1,5 +1,5 @@
 {
-  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "layered-workflows",
   "compatibility_date": "2025-12-10",
   "compatibility_flags": ["nodejs_compat"],
