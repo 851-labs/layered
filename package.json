@@ -1,51 +1,24 @@
 {
-  "name": "www",
+  "name": "layered",
   "private": true,
-  "type": "module",
+  "packageManager": "bun@1.3.5",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite dev --port 3000",
-    "build": "vite build && tsc --noEmit",
-    "preview": "vite preview",
-    "deploy": "bun run build && wrangler deploy",
-    "cf-typegen": "wrangler types",
-    "test": "vitest run",
-    "db:migrations:generate": "drizzle-kit generate",
-    "db:migrations:list": "wrangler d1 migrations list DB --local",
-    "db:migrations:list:production": "wrangler d1 migrations list DB --remote",
-    "db:migrations:apply": "wrangler d1 migrations apply DB --local",
-    "db:migrations:apply:production": "wrangler d1 migrations apply DB --remote"
-  },
-  "dependencies": {
-    "@cloudflare/vite-plugin": "^1.17.1",
-    "@fal-ai/client": "^1.8.1",
-    "@tailwindcss/vite": "^4.0.6",
-    "@tanstack/react-devtools": "^0.7.0",
-    "@tanstack/react-router": "^1.132.0",
-    "@tanstack/react-router-devtools": "^1.132.0",
-    "@tanstack/react-router-ssr-query": "^1.131.7",
-    "@tanstack/react-start": "^1.132.0",
-    "@tanstack/router-plugin": "^1.132.0",
-    "drizzle-orm": "^0.45.1",
-    "lucide-react": "^0.561.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwindcss": "^4.0.6",
-    "vite-tsconfig-paths": "^6.0.2",
-    "wrangler": "^4.54.0"
+    "dev": "turbo dev --filter=@layered/web",
+    "dev:workflows": "turbo dev --filter=@layered/workflows",
+    "types:generate": "turbo types:generate",
+    "build": "turbo build",
+    "deploy": "turbo deploy",
+    "db:migrations:generate": "turbo db:migrations:generate",
+    "db:migrations:list": "turbo db:migrations:list",
+    "db:migrations:list:production": "turbo db:migrations:list:production",
+    "db:migrations:apply": "turbo db:migrations:apply",
+    "db:migrations:apply:production": "turbo db:migrations:apply:production"
   },
   "devDependencies": {
-    "@tanstack/devtools-vite": "^0.3.11",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/react": "^16.2.0",
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@vitejs/plugin-react": "^5.0.4",
-    "drizzle-kit": "^0.31.8",
-    "jsdom": "^27.0.0",
-    "typescript": "^5.7.2",
-    "vite": "^7.1.7",
-    "vitest": "^3.0.5",
-    "web-vitals": "^5.1.0"
+    "turbo": "^2.7.2"
   }
 }

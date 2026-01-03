@@ -4,8 +4,8 @@ import { env } from "cloudflare:workers"
 
 import { desc, eq } from "drizzle-orm"
 import { db } from "./db"
-import { generations } from "./db/schema"
-import { generateId } from "./uuid"
+import { generations } from "@layered/db/schema"
+import { generateId } from "@layered/utils/uuid"
 
 function getFalClient() {
   return createFalClient({
@@ -89,6 +89,12 @@ const decomposeImage = createServerFn({ method: "POST" })
       createdAt: new Date(),
     })
     console.log("Saved generation to database:", id)
+
+    // Trigger background workflow to upload layers to R2
+    await env.UPLOAD_GENERATION_LAYERS_WORKFLOW.create({
+      params: { generationId: id },
+    })
+    console.log("Triggered upload workflow for generation:", id)
 
     return {
       id,

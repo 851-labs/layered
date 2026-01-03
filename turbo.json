@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", "dist/**"]
+    },
+    "types:generate": {
+      "cache": false
+    },
+    "deploy": {
+      "dependsOn": ["build"]
+    },
+    "db:migrations:generate": {
+      "cache": false
+    },
+    "db:migrations:list": {
+      "cache": false
+    },
+    "db:migrations:list:production": {
+      "cache": false
+    },
+    "db:migrations:apply": {
+      "cache": false
+    },
+    "db:migrations:apply:production": {
+      "cache": false
+    }
+  }
+}

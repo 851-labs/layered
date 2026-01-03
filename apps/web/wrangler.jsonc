@@ -1,29 +1,37 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "layered",
   "compatibility_date": "2025-12-10",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "observability": {
     "enabled": true,
-    "head_sampling_rate": 1.0,
+    "head_sampling_rate": 1.0
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "layered",
       "database_id": "56e7df3a-df01-4881-b00d-05ad0a9012ff",
-      "migrations_dir": "drizzle/migrations",
-    },
+      "migrations_dir": "drizzle/migrations"
+    }
   ],
   "ai": {
     "binding": "AI",
-    "remote": true,
+    "remote": true
   },
   "r2_buckets": [
     {
       "binding": "BUCKET",
-      "bucket_name": "layered",
-    },
+      "bucket_name": "layered"
+    }
   ],
+  "workflows": [
+    {
+      "name": "upload-generation-layers-workflow",
+      "binding": "UPLOAD_GENERATION_LAYERS_WORKFLOW",
+      "class_name": "UploadGenerationLayersWorkflow",
+      "script_name": "layered-workflows"
+    }
+  ]
 }

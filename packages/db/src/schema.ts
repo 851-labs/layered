@@ -10,4 +10,5 @@ const generations = sqliteTable("generations", {
 type Generation = typeof generations.$inferSelect
 type NewGeneration = typeof generations.$inferInsert
 
-export { generations, Generation, NewGeneration }
+export { generations }
+export type { Generation, NewGeneration }

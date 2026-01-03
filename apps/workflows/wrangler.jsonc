@@ -1,0 +1,31 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "layered-workflows",
+  "compatibility_date": "2025-12-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.ts",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1.0
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "layered",
+      "database_id": "56e7df3a-df01-4881-b00d-05ad0a9012ff"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "layered"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "upload-generation-layers-workflow",
+      "binding": "UPLOAD_GENERATION_LAYERS_WORKFLOW",
+      "class_name": "UploadGenerationLayersWorkflow"
+    }
+  ]
+}
