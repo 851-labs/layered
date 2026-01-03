@@ -6,15 +6,16 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "turbo dev --filter=@layered/web",
-    "types:generate": "turbo types:generate",
-    "build": "turbo build",
-    "deploy": "turbo deploy",
-    "db:migrations:generate": "turbo db:migrations:generate",
-    "db:migrations:list": "turbo db:migrations:list",
-    "db:migrations:list:production": "turbo db:migrations:list:production",
-    "db:migrations:apply": "turbo db:migrations:apply",
-    "db:migrations:apply:production": "turbo db:migrations:apply:production"
+    "kill-ports": "(lsof -ti :3000 | xargs kill -9; lsof -ti :42069 | xargs kill -9; lsof -ti :9229 | xargs kill -9) 2>/dev/null || true",
+    "dev": "bun run kill-ports && bun --filter=@layered/web dev ",
+    "types:generate": "bun --filter=@layered/web types:generate",
+    "build": "bun --filter=@layered/web build",
+    "deploy": "bun --filter=@layered/web deploy",
+    "db:migrations:generate": "bun --filter=@layered/web db:migrations:generate",
+    "db:migrations:list": "bun --filter=@layered/web db:migrations:list",
+    "db:migrations:list:production": "bun --filter=@layered/web db:migrations:list:production",
+    "db:migrations:apply": "bun --filter=@layered/web db:migrations:apply",
+    "db:migrations:apply:production": "bun --filter=@layered/web db:migrations:apply:production"
   },
   "devDependencies": {
     "turbo": "^2.7.2"

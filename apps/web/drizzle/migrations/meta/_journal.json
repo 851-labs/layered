@@ -8,6 +8,27 @@
       "when": 1767325667978,
       "tag": "0000_milky_pretty_boy",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1735830000000,
+      "tag": "0001_predictions_and_blobs",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1735840000000,
+      "tag": "0002_add_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1735850000000,
+      "tag": "0003_rename_input_output",
+      "breakpoints": true
     }
   ]
 }

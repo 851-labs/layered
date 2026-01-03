@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react"
 
 import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
-import { getGeneration } from "../lib/fal"
+import { getPrediction } from "../lib/fal"
 
 type LayerState = {
   url: string
@@ -13,10 +13,10 @@ type LayerState = {
 }
 
 function GenerationPage() {
-  const { generation } = Route.useLoaderData()
+  const { prediction } = Route.useLoaderData()
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
-    generation.layers.map((url) => ({
+    prediction.layers.map((url) => ({
       url,
       visible: true,
       opacity: 1,
@@ -49,7 +49,7 @@ function GenerationPage() {
           <Link to="/" className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
             <ArrowLeft className="w-5 h-5 text-stone-500" />
           </Link>
-          <span className="text-sm text-stone-500">Generation {generation.id.slice(0, 8)}</span>
+          <span className="text-sm text-stone-500">Prediction {prediction.id.slice(0, 8)}</span>
         </div>
 
         {/* 3D Viewer */}
@@ -73,8 +73,8 @@ function GenerationPage() {
 
 const Route = createFileRoute("/g/$id")({
   loader: async ({ params }) => {
-    const generation = await getGeneration({ data: { id: params.id } })
-    return { generation }
+    const prediction = await getPrediction({ data: { id: params.id } })
+    return { prediction }
   },
   component: GenerationPage,
 })

@@ -28,9 +28,12 @@
   ],
   "workflows": [
     {
-      "name": "upload-generation-layers-workflow",
-      "binding": "UPLOAD_GENERATION_LAYERS_WORKFLOW",
-      "class_name": "UploadGenerationLayersWorkflow"
+      "name": "upload-prediction-blobs-workflow",
+      "binding": "UPLOAD_PREDICTION_BLOBS_WORKFLOW",
+      "class_name": "UploadPredictionBlobsWorkflow"
     }
-  ]
+  ],
+  "vars": {
+    "R2_PUBLIC_URL": "https://cdn.layered.so"
+  }
 }

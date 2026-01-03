@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState, useCallback } from "react"
 import { Upload, Loader2, AlertCircle } from "lucide-react"
 
-import { uploadImage, decomposeImage } from "../lib/fal"
+import { uploadImage, runPrediction } from "../lib/fal"
 
 type ExampleCardProps = {
   example: { id: string; input: string; layers: string[] }
@@ -149,7 +149,7 @@ function App() {
           data: { base64, contentType: file.type },
         })
 
-        const result = await decomposeImage({ data: { imageUrl: url } })
+        const result = await runPrediction({ data: { imageUrl: url } })
 
         if (!result.layers || result.layers.length === 0) {
           throw new Error("No layers were extracted from the image")

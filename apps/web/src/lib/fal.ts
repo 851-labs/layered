@@ -4,8 +4,9 @@ import { env } from "cloudflare:workers"
 
 import { desc, eq } from "drizzle-orm"
 import { db } from "./db"
-import { generations } from "./db/schema"
+import { predictions, blobs } from "./db/schema"
 import { generateId } from "./uuid"
+import { endpointSchemas } from "./fal/schemas"
 
 function getFalClient() {
   return createFalClient({
@@ -13,19 +14,12 @@ function getFalClient() {
   })
 }
 
-type LayerResult = {
-  layers: Array<{
-    url: string
-    content_type: string
-  }>
-}
-
 type UploadInput = {
   base64: string
   contentType: string
 }
 
-type DecomposeInput = {
+type RunPredictionInput = {
   imageUrl: string
 }
 
@@ -52,100 +46,120 @@ const uploadImage = createServerFn({ method: "POST" })
     return { url }
   })
 
+const ENDPOINT_ID = "fal-ai/qwen-image-layered"
+
 /**
- * Process an image through qwen-image-layered model
+ * Run a prediction through the qwen-image-layered model
  */
-const decomposeImage = createServerFn({ method: "POST" })
-  .inputValidator((input: DecomposeInput) => input)
+const runPrediction = createServerFn({ method: "POST" })
+  .inputValidator((input: RunPredictionInput) => input)
   .handler(async ({ data }) => {
     const { imageUrl } = data
 
     const fal = getFalClient()
-    const result = await fal.subscribe("fal-ai/qwen-image-layered", {
-      input: {
-        image_url: imageUrl,
-      },
-      logs: true,
-    })
+    const input = { image_url: imageUrl }
+    const result = await fal.subscribe(ENDPOINT_ID, { input })
 
     console.log("fal.ai response:", JSON.stringify(result, null, 2))
 
-    // The response structure may vary - handle both possible formats
-    const responseData = result.data as Record<string, unknown>
-    const layers = (responseData.layers || responseData.images || []) as Array<{
-      url: string
-      content_type?: string
-    }>
+    const output = endpointSchemas[ENDPOINT_ID].parse(result.data)
 
-    if (!layers || layers.length === 0) {
-      throw new Error("No layers returned from the model")
+    if (!output.images || output.images.length === 0) {
+      throw new Error("No images returned from the model")
     }
 
     const id = generateId()
-    await db.insert(generations).values({
-      id,
-      inputUrl: imageUrl,
-      layers: JSON.stringify(layers.map((l) => l.url)),
-      createdAt: new Date(),
-    })
-    console.log("Saved generation to database:", id)
 
-    // Trigger background workflow to upload layers to R2
-    await env.UPLOAD_GENERATION_LAYERS_WORKFLOW.create({
-      params: { generationId: id },
+    await db.insert(predictions).values({
+      id,
+      endpointId: ENDPOINT_ID,
+      input: JSON.stringify(input),
+      output: JSON.stringify(output),
     })
-    console.log("Triggered upload workflow for generation:", id)
+    console.log("Saved prediction to database:", id)
+
+    // Trigger background workflow to upload blobs to R2
+    await env.UPLOAD_PREDICTION_BLOBS_WORKFLOW.create({
+      params: { predictionId: id },
+    })
+    console.log("Triggered upload workflow for prediction:", id)
 
     return {
       id,
-      layers,
+      layers: output.images.map((img) => img.url),
       requestId: result.requestId,
     }
   })
 
 /**
- * Get recent generations from the database
+ * Helper to get layer URLs from a prediction (blobs if available, otherwise fall back to output)
  */
-const getGenerations = createServerFn({ method: "GET" }).handler(async () => {
-  try {
-    const results = await db.select().from(generations).orderBy(desc(generations.createdAt)).limit(6)
+function getPredictionLayers(prediction: { blobs: Array<{ id: string }>; output: string }): string[] {
+  if (prediction.blobs.length > 0) {
+    return prediction.blobs.map((b) => `${env.R2_PUBLIC_URL}/${b.id}`)
+  }
+  // Fall back to fal URLs from raw output
+  // TODO: This assumes qwen-image-layered, should be dynamic based on prediction.endpointId
+  const output = endpointSchemas["fal-ai/qwen-image-layered"].parse(JSON.parse(prediction.output))
+  return output.images.map((img) => img.url)
+}
 
-    return {
-      generations: results.map((g) => ({
-        id: g.id,
-        inputUrl: g.inputUrl,
-        layers: JSON.parse(g.layers) as string[],
-        createdAt: g.createdAt,
-      })),
-    }
+/**
+ * Get recent predictions from the database
+ */
+const getPredictions = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const results = await db.select().from(predictions).orderBy(desc(predictions.createdAt)).limit(6)
+
+    // Get blobs for each prediction
+    const predictionsWithBlobs = await Promise.all(
+      results.map(async (p) => {
+        const predictionBlobs = await db
+          .select()
+          .from(blobs)
+          .where(eq(blobs.predictionId, p.id))
+          .orderBy(blobs.createdAt)
+
+        return {
+          id: p.id,
+          layers: getPredictionLayers({ blobs: predictionBlobs, output: p.output }),
+          createdAt: p.createdAt,
+        }
+      })
+    )
+
+    return { predictions: predictionsWithBlobs }
   } catch (err) {
-    console.error("Failed to fetch generations:", err)
-    return { generations: [] }
+    console.error("Failed to fetch predictions:", err)
+    return { predictions: [] }
   }
 })
 
-type GetGenerationInput = {
+type GetPredictionInput = {
   id: string
 }
 
 /**
- * Get a single generation by ID
+ * Get a single prediction by ID
  */
-const getGeneration = createServerFn({ method: "GET" })
-  .inputValidator((input: GetGenerationInput) => input)
+const getPrediction = createServerFn({ method: "GET" })
+  .inputValidator((input: GetPredictionInput) => input)
   .handler(async ({ data }) => {
-    const result = await db.select().from(generations).where(eq(generations.id, data.id)).get()
+    const result = await db.select().from(predictions).where(eq(predictions.id, data.id)).get()
 
-    if (!result) {
-      throw new Error("Generation not found")
-    }
+    if (!result) throw new Error("Prediction not found")
+
+    const predictionBlobs = await db
+      .select()
+      .from(blobs)
+      .where(eq(blobs.predictionId, result.id))
+      .orderBy(blobs.createdAt)
 
     return {
       id: result.id,
-      inputUrl: result.inputUrl,
-      layers: JSON.parse(result.layers) as string[],
+      layers: getPredictionLayers({ blobs: predictionBlobs, output: result.output }),
       createdAt: result.createdAt,
     }
   })
 
-export { decomposeImage, getGeneration, getGenerations, LayerResult, uploadImage }
+export { getPrediction, getPredictions, runPrediction, uploadImage }
