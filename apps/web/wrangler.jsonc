@@ -23,7 +23,9 @@
   "r2_buckets": [
     {
       "binding": "BUCKET",
-      "bucket_name": "layered"
+      "bucket_name": "layered",
+      "preview_bucket_name": "layered-preview",
+      "remote": true
     }
   ],
   "workflows": [
