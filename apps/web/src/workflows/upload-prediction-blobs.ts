@@ -1,9 +1,9 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers"
 import { eq } from "drizzle-orm"
-import { predictions, blobs, contentTypeEnum } from "../lib/db/schema"
+import { predictions, blobs } from "../lib/db/schema"
 import { db } from "../lib/db"
 import { generateId } from "../lib/uuid"
-import { endpointSchemas } from "../lib/fal/schemas"
+import { endpointSchemas } from "../lib/fal/schema"
 
 type Params = {
   predictionId: string
@@ -36,15 +36,10 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
           httpMetadata: { contentType: image.content_type },
         })
 
-        // Map content type to enum value
-        const contentType = contentTypeEnum.includes(image.content_type as (typeof contentTypeEnum)[number])
-          ? (image.content_type as (typeof contentTypeEnum)[number])
-          : "image/png" // fallback
-
         await db.insert(blobs).values({
           id: blobId,
           predictionId,
-          contentType,
+          contentType: image.content_type,
           fileName: image.file_name,
           fileSize: image.file_size,
           width: image.width,

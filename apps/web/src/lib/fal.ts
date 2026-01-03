@@ -5,8 +5,7 @@ import { env } from "cloudflare:workers"
 import { desc, eq } from "drizzle-orm"
 import { db } from "./db"
 import { predictions, blobs, endpointIdEnum } from "./db/schema"
-import { generateId } from "./uuid"
-import { endpointSchemas } from "./fal/schemas"
+import { endpointSchemas } from "./fal/schema"
 
 function getFalClient() {
   return createFalClient({
@@ -65,24 +64,22 @@ const runPrediction = createServerFn({ method: "POST" })
       throw new Error("No images returned from the model")
     }
 
-    const id = generateId()
-
-    await db.insert(predictions).values({
-      id,
-      endpointId: ENDPOINT_ID,
-      input: JSON.stringify(input),
-      output: JSON.stringify(output),
-    })
-    console.log("Saved prediction to database:", id)
+    const [prediction] = await db
+      .insert(predictions)
+      .values({
+        endpointId: ENDPOINT_ID,
+        input: JSON.stringify(input),
+        output: JSON.stringify(output),
+      })
+      .returning({ id: predictions.id })
 
     // Trigger background workflow to upload blobs to R2
     await env.UPLOAD_PREDICTION_BLOBS_WORKFLOW.create({
-      params: { predictionId: id },
+      params: { predictionId: prediction.id },
     })
-    console.log("Triggered upload workflow for prediction:", id)
 
     return {
-      id,
+      id: prediction.id,
       layers: output.images.map((img) => img.url),
       requestId: result.requestId,
     }
