@@ -11,9 +11,9 @@
     "test": "vitest run",
     "db:migrations:generate": "drizzle-kit generate",
     "db:migrations:list": "wrangler d1 migrations list DB --local",
-    "db:migrations:list:production": "wrangler d1 migrations list DB --remote",
+    "db:migrations:list:prod": "wrangler d1 migrations list DB --remote",
     "db:migrations:apply": "wrangler d1 migrations apply DB --local",
-    "db:migrations:apply:production": "wrangler d1 migrations apply DB --remote"
+    "db:migrations:apply:prod": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.17.1",

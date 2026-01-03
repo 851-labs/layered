@@ -13,9 +13,9 @@
     "deploy": "bun --filter=@layered/web deploy",
     "db:migrations:generate": "bun --filter=@layered/web db:migrations:generate",
     "db:migrations:list": "bun --filter=@layered/web db:migrations:list",
-    "db:migrations:list:production": "bun --filter=@layered/web db:migrations:list:production",
+    "db:migrations:list:prod": "bun --filter=@layered/web db:migrations:list:prod",
     "db:migrations:apply": "bun --filter=@layered/web db:migrations:apply",
-    "db:migrations:apply:production": "bun --filter=@layered/web db:migrations:apply:production"
+    "db:migrations:apply:prod": "bun --filter=@layered/web db:migrations:apply:prod"
   },
   "devDependencies": {
     "turbo": "^2.7.2"

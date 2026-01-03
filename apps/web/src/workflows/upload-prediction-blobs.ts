@@ -19,14 +19,12 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
 
     if (!prediction) throw new Error(`Prediction ${predictionId} not found`)
 
-    // TODO: Make dynamic based on prediction.endpointId when we support multiple endpoints
-    const output = endpointSchemas["fal-ai/qwen-image-layered"].parse(JSON.parse(prediction.output))
+    const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
     const images = output.images
 
     // Upload each image and create blob rows
-    for (let i = 0; i < images.length; i++) {
-      await step.do(`upload-image-${i}`, async () => {
-        const image = images[i]
+    for (const [index, image] of images.entries()) {
+      await step.do(`upload-image-${index}`, async () => {
         const blobId = generateId()
 
         // Fetch image from fal URL

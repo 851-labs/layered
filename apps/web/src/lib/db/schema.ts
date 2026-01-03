@@ -2,10 +2,11 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 
 const contentTypeEnum = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
 const statusEnum = ["processing", "completed", "failed"] as const
+const endpointIdEnum = ["fal-ai/qwen-image-layered"] as const
 
 const predictions = sqliteTable("predictions", {
   id: text("id").primaryKey(),
-  endpointId: text("endpoint_id").notNull(),
+  endpointId: text("endpoint_id", { enum: endpointIdEnum }).notNull(),
   input: text("input").notNull(),
   output: text("output").notNull(),
   status: text("status", { enum: statusEnum })
@@ -40,5 +41,5 @@ type NewPrediction = typeof predictions.$inferInsert
 type Blob = typeof blobs.$inferSelect
 type NewBlob = typeof blobs.$inferInsert
 
-export { predictions, blobs, contentTypeEnum, statusEnum }
+export { predictions, blobs, contentTypeEnum, statusEnum, endpointIdEnum }
 export type { Prediction, NewPrediction, Blob, NewBlob }

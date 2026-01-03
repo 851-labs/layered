@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { endpointIdEnum } from "../db/schema"
 
 const falImage = z.object({
   url: z.string().url(),
@@ -22,7 +23,7 @@ type QwenImageLayeredOutput = z.infer<typeof qwenImageLayeredOutput>
 
 const endpointSchemas = {
   "fal-ai/qwen-image-layered": qwenImageLayeredOutput,
-} as const
+} as const satisfies Record<(typeof endpointIdEnum)[number], z.ZodType>
 
 export { falImage, endpointSchemas }
 export type { FalImage, QwenImageLayeredOutput }

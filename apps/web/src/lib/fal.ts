@@ -4,7 +4,7 @@ import { env } from "cloudflare:workers"
 
 import { desc, eq } from "drizzle-orm"
 import { db } from "./db"
-import { predictions, blobs } from "./db/schema"
+import { predictions, blobs, endpointIdEnum } from "./db/schema"
 import { generateId } from "./uuid"
 import { endpointSchemas } from "./fal/schemas"
 
@@ -59,9 +59,6 @@ const runPrediction = createServerFn({ method: "POST" })
     const fal = getFalClient()
     const input = { image_url: imageUrl }
     const result = await fal.subscribe(ENDPOINT_ID, { input })
-
-    console.log("fal.ai response:", JSON.stringify(result, null, 2))
-
     const output = endpointSchemas[ENDPOINT_ID].parse(result.data)
 
     if (!output.images || output.images.length === 0) {
@@ -94,13 +91,16 @@ const runPrediction = createServerFn({ method: "POST" })
 /**
  * Helper to get layer URLs from a prediction (blobs if available, otherwise fall back to output)
  */
-function getPredictionLayers(prediction: { blobs: Array<{ id: string }>; output: string }): string[] {
+function getPredictionLayers(prediction: {
+  blobs: Array<{ id: string }>
+  output: string
+  endpointId: (typeof endpointIdEnum)[number]
+}): string[] {
   if (prediction.blobs.length > 0) {
     return prediction.blobs.map((b) => `${env.R2_PUBLIC_URL}/${b.id}`)
   }
   // Fall back to fal URLs from raw output
-  // TODO: This assumes qwen-image-layered, should be dynamic based on prediction.endpointId
-  const output = endpointSchemas["fal-ai/qwen-image-layered"].parse(JSON.parse(prediction.output))
+  const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
   return output.images.map((img) => img.url)
 }
 
@@ -122,7 +122,7 @@ const getPredictions = createServerFn({ method: "GET" }).handler(async () => {
 
         return {
           id: p.id,
-          layers: getPredictionLayers({ blobs: predictionBlobs, output: p.output }),
+          layers: getPredictionLayers({ blobs: predictionBlobs, output: p.output, endpointId: p.endpointId }),
           createdAt: p.createdAt,
         }
       })
@@ -157,7 +157,7 @@ const getPrediction = createServerFn({ method: "GET" })
 
     return {
       id: result.id,
-      layers: getPredictionLayers({ blobs: predictionBlobs, output: result.output }),
+      layers: getPredictionLayers({ blobs: predictionBlobs, output: result.output, endpointId: result.endpointId }),
       createdAt: result.createdAt,
     }
   })
