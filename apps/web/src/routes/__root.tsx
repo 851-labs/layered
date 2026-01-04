@@ -1,8 +1,10 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import { configure } from "onedollarstats"
 
 import { Header } from "../components/header"
 
 import appCss from "../styles.css?url"
+import { useEffect } from "react"
 
 const Route = createRootRoute({
   head: () => ({
@@ -47,6 +49,10 @@ const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    configure({ trackLocalhostAs: "layered.test" })
+  }, [])
+
   return (
     <html lang="en">
       <head>
