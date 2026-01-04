@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
-import { generateId } from "../uuid"
+import { generateId } from "../../uuid"
 
 const contentTypeEnum = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
 const statusEnum = ["processing", "completed", "failed"] as const
@@ -42,5 +42,6 @@ type NewPrediction = typeof predictions.$inferInsert
 type Blob = typeof blobs.$inferSelect
 type NewBlob = typeof blobs.$inferInsert
 
+export * from "./auth.gen"
 export { predictions, blobs, contentTypeEnum, statusEnum, endpointIdEnum }
 export type { Prediction, NewPrediction, Blob, NewBlob }
