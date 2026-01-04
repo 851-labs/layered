@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState, useCallback } from "react"
 import { Upload, Loader2, AlertCircle } from "lucide-react"
 
-import { uploadImage, runPrediction } from "../lib/fal"
+import { uploadImage, runPrediction } from "../lib/boop"
 
 type ExampleCardProps = {
   example: { id: string; input: string; layers: string[] }

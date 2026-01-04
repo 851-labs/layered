@@ -7,6 +7,7 @@
     "build": "vite build && tsc --noEmit",
     "preview": "vite preview",
     "deploy": "bun run build && wrangler deploy",
+    "types:check": "tsc --noEmit",
     "types:generate": "wrangler types",
     "test": "vitest run",
     "auth:generate": "bunx @better-auth/cli@latest generate --yes --config src/lib/auth/server.ts --output src/lib/db/schema/auth.gen.ts",

@@ -8,7 +8,8 @@
   "scripts": {
     "kill-ports": "(lsof -ti :3000 | xargs kill -9; lsof -ti :42069 | xargs kill -9; lsof -ti :9229 | xargs kill -9) 2>/dev/null || true",
     "dev": "bun run kill-ports && bun --filter=@layered/web dev ",
-    "types:generate": "bun --filter=@layered/web types:generate",
+    "types:check": "turbo types:check",
+    "types:generate": "turbo types:generate",
     "build": "bun --filter=@layered/web build",
     "deploy": "bun --filter=@layered/web deploy",
     "db:migrations:generate": "bun --filter=@layered/web db:migrations:generate",

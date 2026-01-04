@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react"
 
 import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
-import { getPrediction } from "../lib/fal"
+import { getPrediction } from "../lib/boop"
 
 type LayerState = {
   url: string

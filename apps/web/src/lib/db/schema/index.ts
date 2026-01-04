@@ -1,5 +1,6 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 import { generateId } from "../../uuid"
+import { users } from "./auth.gen"
 
 const contentTypeEnum = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
 const statusEnum = ["processing", "completed", "failed"] as const
@@ -7,6 +8,7 @@ const endpointIdEnum = ["fal-ai/qwen-image-layered"] as const
 
 const predictions = sqliteTable("predictions", {
   id: text("id").primaryKey().$defaultFn(generateId),
+  userId: text("user_id").references(() => users.id),
   endpointId: text("endpoint_id", { enum: endpointIdEnum }).notNull(),
   input: text("input").notNull(),
   output: text("output").notNull(),

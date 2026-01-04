@@ -1,17 +1,12 @@
-import { createFalClient } from "@fal-ai/client"
 import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
 
 import { desc, eq } from "drizzle-orm"
+import { throwIfUnauthenticatedMiddleware } from "./auth/middleware"
 import { db } from "./db"
-import { predictions, blobs, endpointIdEnum } from "./db/schema"
+import { blobs, endpointIdEnum, predictions } from "./db/schema"
+import { getFalClient } from "./fal"
 import { endpointSchemas } from "./fal/schema"
-
-function getFalClient() {
-  return createFalClient({
-    credentials: env.FAL_KEY,
-  })
-}
 
 type UploadInput = {
   base64: string
@@ -26,6 +21,7 @@ type RunPredictionInput = {
  * Upload an image to fal.ai storage and get a URL back
  */
 const uploadImage = createServerFn({ method: "POST" })
+  .middleware([throwIfUnauthenticatedMiddleware])
   .inputValidator((input: UploadInput) => input)
   .handler(async ({ data }) => {
     const { base64, contentType } = data
@@ -51,8 +47,9 @@ const ENDPOINT_ID = "fal-ai/qwen-image-layered"
  * Run a prediction through the qwen-image-layered model
  */
 const runPrediction = createServerFn({ method: "POST" })
+  .middleware([throwIfUnauthenticatedMiddleware])
   .inputValidator((input: RunPredictionInput) => input)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { imageUrl } = data
 
     const fal = getFalClient()
@@ -67,6 +64,7 @@ const runPrediction = createServerFn({ method: "POST" })
     const [prediction] = await db
       .insert(predictions)
       .values({
+        userId: context.session.user.id,
         endpointId: ENDPOINT_ID,
         input: JSON.stringify(input),
         output: JSON.stringify(output),
