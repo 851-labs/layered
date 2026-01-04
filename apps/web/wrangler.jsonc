@@ -30,6 +30,10 @@
       "custom_domain": true
     }
   ],
+  "vars": {
+    "R2_PUBLIC_URL": "https://cdn.layered.so",
+    "BETTER_AUTH_URL": "https://layered.so"
+  },
   "d1_databases": [
     {
       "binding": "DB",
@@ -60,8 +64,5 @@
       "binding": "UPLOAD_PREDICTION_BLOBS_WORKFLOW",
       "class_name": "UploadPredictionBlobsWorkflow"
     }
-  ],
-  "vars": {
-    "R2_PUBLIC_URL": "https://cdn.layered.so"
-  }
+  ]
 }

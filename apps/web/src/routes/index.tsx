@@ -202,7 +202,11 @@ function App() {
                 className={`
                   w-16 h-16 rounded-2xl border-2 border-dashed 
                   flex items-center justify-center transition-colors
-                  ${isProcessing ? "border-stone-300 bg-stone-100" : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100"}
+                  ${
+                    isProcessing
+                      ? "border-stone-300 bg-stone-100"
+                      : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100"
+                  }
                 `}
               >
                 {isProcessing ? (

@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "kill-ports": "(lsof -ti :3000 | xargs kill -9; lsof -ti :42069 | xargs kill -9; lsof -ti :9229 | xargs kill -9) 2>/dev/null || true",
-    "dev": "bun run kill-ports && bun --filter=@layered/web dev ",
+    "dev": "bun run kill-ports && cd apps/web && bun dev ",
     "types:check": "turbo types:check",
     "types:generate": "turbo types:generate",
     "build": "bun --filter=@layered/web build",
