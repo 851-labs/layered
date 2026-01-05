@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useState, useCallback } from "react"
-import { ArrowLeft } from "lucide-react"
 
 import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
-import { getPrediction } from "../lib/boop"
+import { HistorySidebar } from "../components/history-sidebar"
+import { getPrediction, getPredictions } from "../lib/boop"
 
 type LayerState = {
   url: string
@@ -13,7 +13,7 @@ type LayerState = {
 }
 
 function GenerationPage() {
-  const { prediction } = Route.useLoaderData()
+  const { prediction, predictions } = Route.useLoaderData()
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
     prediction.layers.map((url) => ({
@@ -42,39 +42,33 @@ function GenerationPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <div className="max-w-[1400px] mx-auto border-x border-stone-200">
-        {/* Header with back button */}
-        <div className="flex items-center gap-4 p-4 border-b border-stone-200">
-          <Link to="/" className="p-2 hover:bg-stone-100 rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5 text-stone-500" />
-          </Link>
-          <span className="text-sm text-stone-500">Prediction {prediction.id.slice(0, 8)}</span>
-        </div>
+    <div className="h-[calc(100vh-56px)] flex bg-stone-50">
+      {/* Left sidebar: History */}
+      <HistorySidebar predictions={predictions} currentId={prediction.id} />
 
-        {/* 3D Viewer */}
-        <div className="aspect-video border-b border-stone-200 bg-stone-100/50">
-          <LayerViewer3D layers={layers} className="w-full h-full" />
-        </div>
-
-        {/* Layer Controls */}
-        <div className="p-6">
-          <LayerPanel
-            layers={layers}
-            onToggleVisibility={handleToggleVisibility}
-            onOpacityChange={handleOpacityChange}
-            onSolo={handleSolo}
-          />
-        </div>
+      {/* Center: 3D Viewer */}
+      <div className="flex-1 flex items-center justify-center bg-stone-100/50">
+        <LayerViewer3D layers={layers} className="w-full h-full" />
       </div>
+
+      {/* Right sidebar: Layers */}
+      <LayerPanel
+        layers={layers}
+        onToggleVisibility={handleToggleVisibility}
+        onOpacityChange={handleOpacityChange}
+        onSolo={handleSolo}
+      />
     </div>
   )
 }
 
 const Route = createFileRoute("/g/$id")({
   loader: async ({ params }) => {
-    const prediction = await getPrediction({ data: { id: params.id } })
-    return { prediction }
+    const [prediction, { predictions }] = await Promise.all([
+      getPrediction({ data: { id: params.id } }),
+      getPredictions(),
+    ])
+    return { prediction, predictions }
   },
   component: GenerationPage,
 })
