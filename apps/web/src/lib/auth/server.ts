@@ -2,11 +2,11 @@ import { betterAuth } from "better-auth"
 import { db } from "../db"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
-import { env } from "cloudflare:workers"
+import { env, waitUntil } from "cloudflare:workers"
 import { generateId } from "../uuid"
 
 export const auth = betterAuth({
-  baseURL: "http://localhost:3000",
+  baseURL: env.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
     provider: "sqlite",
     usePlural: true,
@@ -21,6 +21,9 @@ export const auth = betterAuth({
   advanced: {
     database: {
       generateId: () => generateId(),
+    },
+    backgroundTasks: {
+      handler: waitUntil,
     },
   },
 })
