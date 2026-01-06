@@ -21,6 +21,7 @@
         "@tanstack/react-start": "^1.145.5",
         "@tanstack/router-plugin": "^1.145.4",
         "better-auth": "^1.4.10",
+        "clsx": "^2.1.1",
         "drizzle-orm": "^0.45.1",
         "lucide-react": "^0.562.0",
         "nanoid": "^5.1.6",
