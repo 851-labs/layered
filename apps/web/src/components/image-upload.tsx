@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react"
 import { Upload, Image as ImageIcon, Loader2 } from "lucide-react"
 
+import { cn } from "../lib/cn"
+
 type ImageUploadProps = {
   onImageSelected: (file: File) => void
   isUploading?: boolean
@@ -84,16 +86,13 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={handleClick}
-        className={`
-          relative overflow-hidden rounded-2xl border-2 border-dashed
-          transition-all duration-300 cursor-pointer
-          ${
-            isDragOver
-              ? "border-amber-400 bg-amber-400/10 scale-[1.02]"
-              : "border-zinc-600 hover:border-zinc-500 bg-zinc-900/50"
-          }
-          ${disabled || isUploading ? "opacity-50 cursor-not-allowed" : ""}
-        `}
+        className={cn(
+          "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer",
+          isDragOver
+            ? "border-amber-400 bg-amber-400/10 scale-[1.02]"
+            : "border-zinc-600 hover:border-zinc-500 bg-zinc-900/50",
+          (disabled || isUploading) && "opacity-50 cursor-not-allowed"
+        )}
       >
         {preview ? (
           <div className="relative aspect-video">
@@ -110,10 +109,10 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
         ) : (
           <div className="p-12 flex flex-col items-center gap-4">
             <div
-              className={`
-              p-4 rounded-full transition-colors
-              ${isDragOver ? "bg-amber-400/20" : "bg-zinc-800"}
-            `}
+              className={cn(
+                "p-4 rounded-full transition-colors",
+                isDragOver ? "bg-amber-400/20" : "bg-zinc-800"
+              )}
             >
               {isDragOver ? (
                 <ImageIcon className="w-10 h-10 text-amber-400" />

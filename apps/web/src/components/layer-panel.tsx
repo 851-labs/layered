@@ -1,5 +1,7 @@
 import { Eye, EyeOff, Focus } from "lucide-react"
 
+import { cn } from "../lib/cn"
+
 type Layer = {
   url: string
   visible: boolean
@@ -26,10 +28,10 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
         {layers.map((layer, index) => (
           <div
             key={index}
-            className={`
-              p-2 rounded-lg border transition-all duration-200
-              ${layer.visible ? "bg-white border-stone-200" : "bg-stone-100 border-stone-200/60 opacity-60"}
-            `}
+            className={cn(
+              "p-2 rounded-lg border transition-all duration-200",
+              layer.visible ? "bg-white border-stone-200" : "bg-stone-100 border-stone-200/60 opacity-60"
+            )}
           >
             <div className="flex gap-3">
               {/* Thumbnail */}
@@ -53,17 +55,12 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
                   value={layer.opacity * 100}
                   onChange={(e) => onOpacityChange(index, parseInt(e.target.value) / 100)}
                   disabled={!layer.visible}
-                  className={`
-                    w-full h-1 rounded-full appearance-none cursor-pointer
-                    bg-stone-200
-                    [&::-webkit-slider-thumb]:appearance-none
-                    [&::-webkit-slider-thumb]:w-3
-                    [&::-webkit-slider-thumb]:h-3
-                    [&::-webkit-slider-thumb]:rounded-full
-                    [&::-webkit-slider-thumb]:bg-stone-900
-                    [&::-webkit-slider-thumb]:cursor-pointer
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  `}
+                  className={cn(
+                    "w-full h-1 rounded-full appearance-none cursor-pointer bg-stone-200",
+                    "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3",
+                    "[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-900 [&::-webkit-slider-thumb]:cursor-pointer",
+                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                  )}
                 />
 
                 {/* Actions */}

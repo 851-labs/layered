@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react"
 import { RotateCcw, Move } from "lucide-react"
 
+import { cn } from "../lib/cn"
+
 type Layer = {
   url: string
   visible: boolean
@@ -61,7 +63,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
   const layerSpacing = 50 * spread
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={cn("relative", className)}>
       {/* Controls */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <button
@@ -86,11 +88,10 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
-        className={`
-          w-full h-full min-h-[300px] flex items-center justify-center
-          cursor-grab select-none
-          ${isDragging ? "cursor-grabbing" : ""}
-        `}
+        className={cn(
+          "w-full h-full min-h-[300px] flex items-center justify-center cursor-grab select-none",
+          isDragging && "cursor-grabbing"
+        )}
         style={{ perspective: "1200px" }}
       >
         <div

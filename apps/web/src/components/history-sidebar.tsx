@@ -4,6 +4,7 @@ import { useState, useCallback } from "react"
 
 import { api } from "../lib/api"
 import { type Prediction } from "../lib/api/schemas"
+import { cn } from "../lib/cn"
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
 type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number]
@@ -93,10 +94,10 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
               key={prediction.id}
               to="/g/$id"
               params={{ id: prediction.id }}
-              className={`
-                block p-2 rounded-lg transition-colors
-                ${isActive ? "bg-stone-200" : "hover:bg-stone-100"}
-              `}
+              className={cn(
+                "block p-2 rounded-lg transition-colors",
+                isActive ? "bg-stone-200" : "hover:bg-stone-100"
+              )}
             >
               <div className="aspect-video rounded overflow-hidden bg-stone-200 mb-2">
                 {prediction.inputBlob && (

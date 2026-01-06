@@ -4,6 +4,7 @@ import { Upload, Loader2, AlertCircle } from "lucide-react"
 
 import { api } from "../lib/api"
 import { authClient } from "../lib/auth/client"
+import { cn } from "../lib/cn"
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
 type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number]
@@ -24,11 +25,10 @@ function ExampleCard({ example, hasBorderRight }: ExampleCardProps) {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`
-        aspect-square relative overflow-hidden
-        border-b border-stone-200
-        ${hasBorderRight ? "border-r" : ""}
-      `}
+      className={cn(
+        "aspect-square relative overflow-hidden border-b border-stone-200",
+        hasBorderRight && "border-r"
+      )}
       style={{ perspective: "900px" }}
     >
       <div
@@ -225,15 +225,12 @@ function App() {
               className="flex flex-col items-center gap-4 group"
             >
               <div
-                className={`
-                  w-16 h-16 rounded-2xl border-2 border-dashed 
-                  flex items-center justify-center transition-colors
-                  ${
-                    isProcessing
-                      ? "border-stone-300 bg-stone-100"
-                      : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100"
-                  }
-                `}
+                className={cn(
+                  "w-16 h-16 rounded-2xl border-2 border-dashed flex items-center justify-center transition-colors",
+                  isProcessing
+                    ? "border-stone-300 bg-stone-100"
+                    : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100"
+                )}
               >
                 {isProcessing ? (
                   <Loader2 className="w-6 h-6 text-stone-400 animate-spin" />
