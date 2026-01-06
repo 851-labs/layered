@@ -20,7 +20,8 @@ const predictions = sqliteTable("predictions", {
     .$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 })
 
 const blobs = sqliteTable("blobs", {
@@ -36,7 +37,8 @@ const blobs = sqliteTable("blobs", {
     .$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 })
 
 type PredictionRow = typeof predictions.$inferSelect
