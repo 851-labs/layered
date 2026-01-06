@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
 import { z } from "zod"
 
-import { throwIfUnauthenticatedMiddleware } from "../../auth/middleware"
+import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
 import { db } from "../../db"
 import { blobs, contentTypeEnum } from "../../db/schema"
 import { generateId } from "../../uuid"
@@ -15,7 +15,7 @@ import { generateId } from "../../uuid"
  * Upload an image to R2 storage and create a blob record.
  */
 const uploadImage = createServerFn({ method: "POST" })
-  .middleware([throwIfUnauthenticatedMiddleware])
+  .middleware([errorHandlingMiddleware, throwIfUnauthenticatedMiddleware])
   .inputValidator(
     z.object({
       base64: z.string(),

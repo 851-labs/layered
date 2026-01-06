@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers"
 import { and, asc, desc, eq } from "drizzle-orm"
 import { z } from "zod"
 
-import { throwIfUnauthenticatedMiddleware } from "../../auth/middleware"
+import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
 import { db } from "../../db"
 import { endpointIdEnum, predictionBlobs, predictions } from "../../db/schema"
 import { getFalClient } from "../../fal"
@@ -40,7 +40,7 @@ function getPredictionLayers(prediction: {
  * Create a new prediction through the qwen-image-layered model.
  */
 const createPrediction = createServerFn({ method: "POST" })
-  .middleware([throwIfUnauthenticatedMiddleware])
+  .middleware([errorHandlingMiddleware, throwIfUnauthenticatedMiddleware])
   .inputValidator(z.object({ imageUrl: z.url(), inputBlobId: z.string() }))
   .handler(async ({ data, context }): Promise<Prediction & { requestId: string }> => {
     const { imageUrl, inputBlobId } = data
@@ -89,6 +89,7 @@ const createPrediction = createServerFn({ method: "POST" })
  * Get a single prediction by ID.
  */
 const getPrediction = createServerFn({ method: "GET" })
+  .middleware([errorHandlingMiddleware])
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }): Promise<Prediction> => {
     const result = await db.select().from(predictions).where(eq(predictions.id, data.id)).get()
@@ -112,8 +113,9 @@ const getPrediction = createServerFn({ method: "GET" })
 /**
  * Get recent predictions from the database.
  */
-const listPredictions = createServerFn({ method: "GET" }).handler(async (): Promise<{ predictions: Prediction[] }> => {
-  try {
+const listPredictions = createServerFn({ method: "GET" })
+  .middleware([errorHandlingMiddleware])
+  .handler(async (): Promise<{ predictions: Prediction[] }> => {
     const results = await db.select().from(predictions).orderBy(desc(predictions.createdAt)).limit(6)
 
     // Get output blobs for each prediction via join table
@@ -134,11 +136,7 @@ const listPredictions = createServerFn({ method: "GET" }).handler(async (): Prom
     )
 
     return { predictions: predictionsWithBlobs }
-  } catch (err) {
-    console.error("Failed to fetch predictions:", err)
-    return { predictions: [] }
-  }
-})
+  })
 
 // -----------------------------------------------------------------------------
 // Router
