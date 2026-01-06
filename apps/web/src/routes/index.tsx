@@ -177,7 +177,7 @@ function App() {
           data: { imageUrl: url, inputBlobId: blobId },
         })
 
-        if (!result.layers || result.layers.length === 0) {
+        if (!result.outputBlobs || result.outputBlobs.length === 0) {
           throw new Error("No layers were extracted from the image")
         }
 

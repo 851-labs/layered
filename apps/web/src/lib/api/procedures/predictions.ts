@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
-import { and, asc, desc, eq } from "drizzle-orm"
+import { asc, desc, eq } from "drizzle-orm"
 import { z } from "zod"
 
-import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
 import { db } from "../../db"
-import { endpointIdEnum, predictionBlobs, predictions } from "../../db/schema"
+import { blobs, endpointIdEnum, predictionBlobs, predictions } from "../../db/schema"
 import { getFalClient } from "../../fal"
 import { endpointSchemas } from "../../fal/schema"
-import { type Prediction } from "../schemas"
+import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
+import { type Blob, type Prediction } from "../schemas"
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -16,20 +16,47 @@ import { type Prediction } from "../schemas"
 
 const ENDPOINT_ID = "fal-ai/qwen-image-layered"
 
+type BlobWithRole = {
+  id: string
+  contentType: string
+  width: number
+  height: number
+  role: "input" | "output"
+}
+
 /**
- * Helper to get layer URLs, falling back to fal URLs if no blobs yet.
+ * Convert a DB blob row to a public Blob schema.
  */
-function getPredictionLayers(prediction: {
-  outputBlobs: Array<{ blobId: string }>
+function toPublicBlob(blob: Omit<BlobWithRole, "role">): Blob {
+  return {
+    id: blob.id,
+    url: `${env.R2_PUBLIC_URL}/${blob.id}`,
+    contentType: blob.contentType,
+    width: blob.width,
+    height: blob.height,
+  }
+}
+
+/**
+ * Helper to get output blobs, falling back to fal URLs if no blobs yet.
+ */
+function getOutputBlobs(prediction: {
+  outputBlobRows: Array<Omit<BlobWithRole, "role">>
   output: string
   endpointId: (typeof endpointIdEnum)[number]
-}): string[] {
-  if (prediction.outputBlobs.length > 0) {
-    return prediction.outputBlobs.map((b) => `${env.R2_PUBLIC_URL}/${b.blobId}`)
+}): Blob[] {
+  if (prediction.outputBlobRows.length > 0) {
+    return prediction.outputBlobRows.map(toPublicBlob)
   }
-  // Fall back to fal URLs from raw output
+  // Fall back to fal URLs from raw output (blobs not uploaded yet)
   const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
-  return output.images.map((img) => img.url)
+  return output.images.map((img, idx) => ({
+    id: `fal-${idx}`,
+    url: img.url,
+    contentType: "image/png",
+    width: img.width ?? null,
+    height: img.height ?? null,
+  }))
 }
 
 // -----------------------------------------------------------------------------
@@ -72,6 +99,20 @@ const createPrediction = createServerFn({ method: "POST" })
       position: 0,
     })
 
+    // Fetch the input blob data
+    const inputBlobRow = await db
+      .select({
+        id: blobs.id,
+        contentType: blobs.contentType,
+        width: blobs.width,
+        height: blobs.height,
+      })
+      .from(blobs)
+      .where(eq(blobs.id, inputBlobId))
+      .get()
+
+    if (!inputBlobRow) throw new Error("Input blob not found")
+
     // Trigger background workflow to upload output blobs to R2
     await env.UPLOAD_PREDICTION_BLOBS_WORKFLOW.create({
       params: { predictionId: prediction.id },
@@ -79,7 +120,14 @@ const createPrediction = createServerFn({ method: "POST" })
 
     return {
       id: prediction.id,
-      layers: output.images.map((img) => img.url),
+      inputBlob: toPublicBlob(inputBlobRow),
+      outputBlobs: output.images.map((img, idx) => ({
+        id: `fal-${idx}`,
+        url: img.url,
+        contentType: "image/png",
+        width: img.width,
+        height: img.height,
+      })),
       createdAt: prediction.createdAt,
       requestId: result.requestId,
     }
@@ -96,16 +144,29 @@ const getPrediction = createServerFn({ method: "GET" })
 
     if (!result) throw new Error("Prediction not found")
 
-    // Get output blobs via join table
-    const outputBlobs = await db
-      .select({ blobId: predictionBlobs.blobId })
+    // Get blobs with full data via join
+    const blobRows = await db
+      .select({
+        id: blobs.id,
+        contentType: blobs.contentType,
+        width: blobs.width,
+        height: blobs.height,
+        role: predictionBlobs.role,
+      })
       .from(predictionBlobs)
-      .where(and(eq(predictionBlobs.predictionId, result.id), eq(predictionBlobs.role, "output")))
+      .innerJoin(blobs, eq(predictionBlobs.blobId, blobs.id))
+      .where(eq(predictionBlobs.predictionId, result.id))
       .orderBy(asc(predictionBlobs.position))
+
+    const outputBlobRows = blobRows.filter((b) => b.role === "output")
+    const inputBlobRow = blobRows.find((b) => b.role === "input")
+
+    if (!inputBlobRow) throw new Error("Input blob not found")
 
     return {
       id: result.id,
-      layers: getPredictionLayers({ outputBlobs, output: result.output, endpointId: result.endpointId }),
+      inputBlob: toPublicBlob(inputBlobRow),
+      outputBlobs: getOutputBlobs({ outputBlobRows, output: result.output, endpointId: result.endpointId }),
       createdAt: result.createdAt,
     }
   })
@@ -118,18 +179,31 @@ const listPredictions = createServerFn({ method: "GET" })
   .handler(async (): Promise<{ predictions: Prediction[] }> => {
     const results = await db.select().from(predictions).orderBy(desc(predictions.createdAt)).limit(6)
 
-    // Get output blobs for each prediction via join table
+    // Get blobs for each prediction via join
     const predictionsWithBlobs = await Promise.all(
       results.map(async (p) => {
-        const outputBlobs = await db
-          .select({ blobId: predictionBlobs.blobId })
+        const blobRows = await db
+          .select({
+            id: blobs.id,
+            contentType: blobs.contentType,
+            width: blobs.width,
+            height: blobs.height,
+            role: predictionBlobs.role,
+          })
           .from(predictionBlobs)
-          .where(and(eq(predictionBlobs.predictionId, p.id), eq(predictionBlobs.role, "output")))
+          .innerJoin(blobs, eq(predictionBlobs.blobId, blobs.id))
+          .where(eq(predictionBlobs.predictionId, p.id))
           .orderBy(asc(predictionBlobs.position))
+
+        const outputBlobRows = blobRows.filter((b) => b.role === "output")
+        const inputBlobRow = blobRows.find((b) => b.role === "input")
+
+        if (!inputBlobRow) throw new Error(`Input blob not found for prediction ${p.id}`)
 
         return {
           id: p.id,
-          layers: getPredictionLayers({ outputBlobs, output: p.output, endpointId: p.endpointId }),
+          inputBlob: toPublicBlob(inputBlobRow),
+          outputBlobs: getOutputBlobs({ outputBlobRows, output: p.output, endpointId: p.endpointId }),
           createdAt: p.createdAt,
         }
       })

@@ -16,8 +16,8 @@ function GenerationPage() {
   const { prediction, predictions } = Route.useLoaderData()
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
-    prediction.layers.map((url: string) => ({
-      url,
+    prediction.outputBlobs.map((blob) => ({
+      url: blob.url,
       visible: true,
       opacity: 1,
     }))

@@ -29,9 +29,9 @@ const blobs = sqliteTable("blobs", {
   id: text("id").primaryKey().$defaultFn(generateId),
   contentType: text("content_type", { enum: contentTypeEnum }).notNull(),
   fileName: text("file_name").notNull(),
-  fileSize: integer("file_size"),
-  width: integer("width"),
-  height: integer("height"),
+  fileSize: integer("file_size").notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

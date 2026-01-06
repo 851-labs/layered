@@ -87,7 +87,6 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {predictions.map((prediction) => {
           const isActive = prediction.id === currentId
-          const thumbnail = prediction.layers[0]
 
           return (
             <Link
@@ -100,9 +99,9 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
               `}
             >
               <div className="aspect-video rounded overflow-hidden bg-stone-200 mb-2">
-                {thumbnail && (
+                {prediction.inputBlob && (
                   <img
-                    src={thumbnail}
+                    src={prediction.inputBlob.url}
                     alt={`Prediction ${prediction.id.slice(0, 8)}`}
                     className="w-full h-full object-cover"
                   />
@@ -110,7 +109,7 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-stone-600 truncate">{prediction.id.slice(0, 8)}</span>
-                <span className="text-xs text-stone-400">{prediction.layers.length} layers</span>
+                <span className="text-xs text-stone-400">{prediction.outputBlobs.length} layers</span>
               </div>
             </Link>
           )

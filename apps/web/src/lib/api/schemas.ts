@@ -4,9 +4,18 @@ import { z } from "zod"
 // Entity Schemas (for normalized store)
 // -----------------------------------------------------------------------------
 
+const blobSchema = z.object({
+  id: z.string(),
+  url: z.url(),
+  contentType: z.string(),
+  width: z.number(),
+  height: z.number(),
+})
+
 const predictionSchema = z.object({
   id: z.string(),
-  layers: z.array(z.url()),
+  inputBlob: blobSchema,
+  outputBlobs: z.array(blobSchema),
   createdAt: z.date(),
 })
 
@@ -14,6 +23,8 @@ const predictionSchema = z.object({
 // Inferred Types
 // -----------------------------------------------------------------------------
 
+type Blob = z.infer<typeof blobSchema>
 type Prediction = z.infer<typeof predictionSchema>
 
-export type { Prediction }
+export { blobSchema, predictionSchema }
+export type { Blob, Prediction }

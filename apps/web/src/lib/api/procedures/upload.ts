@@ -37,6 +37,11 @@ const uploadImage = createServerFn({ method: "POST" })
     // Generate blob ID
     const blobId = generateId()
 
+    // Get image dimensions using Cloudflare Images binding
+    // SVG returns { format: 'image/svg+xml' }, raster images include width/height
+    const info = await env.IMAGES.info(imageBlob.stream())
+    if (!("width" in info)) throw new Error("SVG images are not supported")
+
     // Upload to R2
     await env.BUCKET.put(blobId, imageBlob, {
       httpMetadata: { contentType },
@@ -48,6 +53,8 @@ const uploadImage = createServerFn({ method: "POST" })
       contentType,
       fileName,
       fileSize: imageBlob.size,
+      width: info.width,
+      height: info.height,
     })
 
     // Return blob ID and public R2 URL
