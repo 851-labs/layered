@@ -3,6 +3,14 @@ import { useState, useCallback } from "react"
 import { Upload, Loader2, AlertCircle } from "lucide-react"
 
 import { api } from "../lib/api"
+import { authClient } from "../lib/auth/client"
+
+const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
+type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number]
+
+function isSupportedContentType(type: string): type is SupportedContentType {
+  return SUPPORTED_CONTENT_TYPES.includes(type as SupportedContentType)
+}
 
 type ExampleCardProps = {
   example: { id: string; input: string; layers: string[] }
@@ -125,15 +133,27 @@ const EXAMPLES = [
 
 function App() {
   const navigate = useNavigate()
+  const { data: session } = authClient.useSession()
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleImageSelected = useCallback(
     async (file: File) => {
+      // Check if user is logged in
+      if (!session?.user) {
+        setError("Please sign in to upload images")
+        return
+      }
+
       setIsProcessing(true)
       setError(null)
 
       try {
+        // Validate content type
+        if (!isSupportedContentType(file.type)) {
+          throw new Error(`Unsupported image format: ${file.type || "unknown"}. Please use PNG, JPEG, WebP, or GIF.`)
+        }
+
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader()
           reader.onload = () => {
@@ -148,7 +168,7 @@ function App() {
         const { blobId, url } = await api.upload.image({
           data: {
             base64,
-            contentType: file.type as "image/png" | "image/jpeg" | "image/webp" | "image/gif",
+            contentType: file.type,
             fileName: file.name,
           },
         })
@@ -169,13 +189,13 @@ function App() {
         setIsProcessing(false)
       }
     },
-    [navigate]
+    [navigate, session]
   )
 
   const handleUploadClick = () => {
     const input = document.createElement("input")
     input.type = "file"
-    input.accept = "image/*"
+    input.accept = "image/png,image/jpeg,image/webp,image/gif"
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) handleImageSelected(file)

@@ -5,6 +5,13 @@ import { useState, useCallback } from "react"
 import { api } from "../lib/api"
 import { type Prediction } from "../lib/api/schemas"
 
+const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
+type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number]
+
+function isSupportedContentType(type: string): type is SupportedContentType {
+  return SUPPORTED_CONTENT_TYPES.includes(type as SupportedContentType)
+}
+
 type HistorySidebarProps = {
   predictions: Prediction[]
   currentId: string
@@ -17,10 +24,16 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
   const handleNewClick = useCallback(() => {
     const input = document.createElement("input")
     input.type = "file"
-    input.accept = "image/*"
+    input.accept = "image/png,image/jpeg,image/webp,image/gif"
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
+
+      // Validate content type
+      if (!isSupportedContentType(file.type)) {
+        console.error(`Unsupported image format: ${file.type || "unknown"}`)
+        return
+      }
 
       setIsUploading(true)
       try {
@@ -38,7 +51,7 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
         const { blobId, url } = await api.upload.image({
           data: {
             base64,
-            contentType: file.type as "image/png" | "image/jpeg" | "image/webp" | "image/gif",
+            contentType: file.type,
             fileName: file.name,
           },
         })
