@@ -38,24 +38,27 @@ function toPublicBlob(blob: Omit<BlobWithRole, "role">): Blob {
 }
 
 /**
- * Helper to get output blobs, falling back to fal URLs if no blobs yet.
+ * Helper to get output blobs, falling back to fal URLs if prediction is not completed.
  */
 function getOutputBlobs(prediction: {
   outputBlobRows: Array<Omit<BlobWithRole, "role">>
   output: string
   endpointId: (typeof endpointIdEnum)[number]
+  status: "processing" | "completed" | "failed"
 }): Blob[] {
-  if (prediction.outputBlobRows.length > 0) {
+  // Only return R2 blobs when prediction is completed
+  if (prediction.status === "completed") {
     return prediction.outputBlobRows.map(toPublicBlob)
   }
-  // Fall back to fal URLs from raw output (blobs not uploaded yet)
+
+  // Return fal URLs for processing/failed predictions or when blobs not uploaded yet
   const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
   return output.images.map((img, idx) => ({
     id: `fal-${idx}`,
     url: img.url,
     contentType: "image/png",
-    width: img.width ?? null,
-    height: img.height ?? null,
+    width: img.width,
+    height: img.height,
   }))
 }
 
@@ -166,7 +169,12 @@ const getPrediction = createServerFn({ method: "GET" })
     return {
       id: result.id,
       inputBlob: toPublicBlob(inputBlobRow),
-      outputBlobs: getOutputBlobs({ outputBlobRows, output: result.output, endpointId: result.endpointId }),
+      outputBlobs: getOutputBlobs({
+        outputBlobRows,
+        output: result.output,
+        endpointId: result.endpointId,
+        status: result.status,
+      }),
       createdAt: result.createdAt,
     }
   })
@@ -203,7 +211,7 @@ const listPredictions = createServerFn({ method: "GET" })
         return {
           id: p.id,
           inputBlob: toPublicBlob(inputBlobRow),
-          outputBlobs: getOutputBlobs({ outputBlobRows, output: p.output, endpointId: p.endpointId }),
+          outputBlobs: getOutputBlobs({ outputBlobRows, output: p.output, endpointId: p.endpointId, status: p.status }),
           createdAt: p.createdAt,
         }
       })
