@@ -1,16 +1,25 @@
 import { createServerFn } from "@tanstack/react-start"
+import { env } from "cloudflare:workers"
 import { z } from "zod"
 
 import { throwIfUnauthenticatedMiddleware } from "../../auth/middleware"
-import { getFalClient } from "../../fal"
+import { db } from "../../db"
+import { blobs, contentTypeEnum } from "../../db/schema"
+import { generateId } from "../../uuid"
 
 const uploadRouter = {
-  /** Upload an image to fal.ai storage and get a URL back */
+  /** Upload an image to R2 storage and create a blob record */
   image: createServerFn({ method: "POST" })
     .middleware([throwIfUnauthenticatedMiddleware])
-    .inputValidator(z.object({ base64: z.string(), contentType: z.string() }))
+    .inputValidator(
+      z.object({
+        base64: z.string(),
+        contentType: z.enum(contentTypeEnum),
+        fileName: z.string(),
+      })
+    )
     .handler(async ({ data }) => {
-      const { base64, contentType } = data
+      const { base64, contentType, fileName } = data
 
       // Convert base64 to blob
       const binaryString = atob(base64)
@@ -18,13 +27,27 @@ const uploadRouter = {
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i)
       }
-      const blob = new Blob([bytes], { type: contentType })
+      const imageBlob = new Blob([bytes], { type: contentType })
 
-      // Upload to fal storage
-      const fal = getFalClient()
-      const url = await fal.storage.upload(blob)
+      // Generate blob ID
+      const blobId = generateId()
 
-      return { url }
+      // Upload to R2
+      await env.BUCKET.put(blobId, imageBlob, {
+        httpMetadata: { contentType },
+      })
+
+      // Create blob record in database
+      await db.insert(blobs).values({
+        id: blobId,
+        contentType,
+        fileName,
+        fileSize: imageBlob.size,
+      })
+
+      // Return blob ID and public URL
+      const url = `${env.R2_PUBLIC_URL}/${blobId}`
+      return { blobId, url }
     }),
 }
 

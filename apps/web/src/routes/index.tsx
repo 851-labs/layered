@@ -145,11 +145,17 @@ function App() {
           reader.readAsDataURL(file)
         })
 
-        const { url } = await api.upload.image({
-          data: { base64, contentType: file.type },
+        const { blobId, url } = await api.upload.image({
+          data: {
+            base64,
+            contentType: file.type as "image/png" | "image/jpeg" | "image/webp" | "image/gif",
+            fileName: file.name,
+          },
         })
 
-        const result = await api.prediction.create({ data: { imageUrl: url } })
+        const result = await api.prediction.create({
+          data: { imageUrl: url, inputBlobId: blobId },
+        })
 
         if (!result.layers || result.layers.length === 0) {
           throw new Error("No layers were extracted from the image")

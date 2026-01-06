@@ -1,25 +1,25 @@
 import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
-import { desc, eq } from "drizzle-orm"
+import { and, asc, desc, eq } from "drizzle-orm"
 import { z } from "zod"
 
 import { throwIfUnauthenticatedMiddleware } from "../../auth/middleware"
 import { db } from "../../db"
-import { blobs, endpointIdEnum, predictions } from "../../db/schema"
+import { endpointIdEnum, predictionBlobs, predictions } from "../../db/schema"
 import { getFalClient } from "../../fal"
 import { endpointSchemas } from "../../fal/schema"
 import { type Prediction } from "../schemas"
 
 const ENDPOINT_ID = "fal-ai/qwen-image-layered"
 
-/** Helper to get layer URLs from a prediction (blobs if available, otherwise fall back to output) */
+/** Helper to get layer URLs, falling back to fal URLs if no blobs yet */
 function getPredictionLayers(prediction: {
-  blobs: Array<{ id: string }>
+  outputBlobs: Array<{ blobId: string }>
   output: string
   endpointId: (typeof endpointIdEnum)[number]
 }): string[] {
-  if (prediction.blobs.length > 0) {
-    return prediction.blobs.map((b) => `${env.R2_PUBLIC_URL}/${b.id}`)
+  if (prediction.outputBlobs.length > 0) {
+    return prediction.outputBlobs.map((b) => `${env.R2_PUBLIC_URL}/${b.blobId}`)
   }
   // Fall back to fal URLs from raw output
   const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
@@ -30,9 +30,9 @@ const predictionRouter = {
   /** Create a new prediction through the qwen-image-layered model */
   create: createServerFn({ method: "POST" })
     .middleware([throwIfUnauthenticatedMiddleware])
-    .inputValidator(z.object({ imageUrl: z.url() }))
+    .inputValidator(z.object({ imageUrl: z.url(), inputBlobId: z.string() }))
     .handler(async ({ data, context }): Promise<Prediction & { requestId: string }> => {
-      const { imageUrl } = data
+      const { imageUrl, inputBlobId } = data
 
       const fal = getFalClient()
       const input = { image_url: imageUrl }
@@ -53,7 +53,15 @@ const predictionRouter = {
         })
         .returning({ id: predictions.id, createdAt: predictions.createdAt })
 
-      // Trigger background workflow to upload blobs to R2
+      // Link input blob to prediction
+      await db.insert(predictionBlobs).values({
+        predictionId: prediction.id,
+        blobId: inputBlobId,
+        role: "input",
+        position: 0,
+      })
+
+      // Trigger background workflow to upload output blobs to R2
       await env.UPLOAD_PREDICTION_BLOBS_WORKFLOW.create({
         params: { predictionId: prediction.id },
       })
@@ -74,15 +82,16 @@ const predictionRouter = {
 
       if (!result) throw new Error("Prediction not found")
 
-      const predictionBlobs = await db
-        .select()
-        .from(blobs)
-        .where(eq(blobs.predictionId, result.id))
-        .orderBy(blobs.createdAt)
+      // Get output blobs via join table
+      const outputBlobs = await db
+        .select({ blobId: predictionBlobs.blobId })
+        .from(predictionBlobs)
+        .where(and(eq(predictionBlobs.predictionId, result.id), eq(predictionBlobs.role, "output")))
+        .orderBy(asc(predictionBlobs.position))
 
       return {
         id: result.id,
-        layers: getPredictionLayers({ blobs: predictionBlobs, output: result.output, endpointId: result.endpointId }),
+        layers: getPredictionLayers({ outputBlobs, output: result.output, endpointId: result.endpointId }),
         createdAt: result.createdAt,
       }
     }),
@@ -92,18 +101,18 @@ const predictionRouter = {
     try {
       const results = await db.select().from(predictions).orderBy(desc(predictions.createdAt)).limit(6)
 
-      // Get blobs for each prediction
+      // Get output blobs for each prediction via join table
       const predictionsWithBlobs = await Promise.all(
         results.map(async (p) => {
-          const predictionBlobs = await db
-            .select()
-            .from(blobs)
-            .where(eq(blobs.predictionId, p.id))
-            .orderBy(blobs.createdAt)
+          const outputBlobs = await db
+            .select({ blobId: predictionBlobs.blobId })
+            .from(predictionBlobs)
+            .where(and(eq(predictionBlobs.predictionId, p.id), eq(predictionBlobs.role, "output")))
+            .orderBy(asc(predictionBlobs.position))
 
           return {
             id: p.id,
-            layers: getPredictionLayers({ blobs: predictionBlobs, output: p.output, endpointId: p.endpointId }),
+            layers: getPredictionLayers({ outputBlobs, output: p.output, endpointId: p.endpointId }),
             createdAt: p.createdAt,
           }
         })

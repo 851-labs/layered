@@ -35,11 +35,17 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
           reader.readAsDataURL(file)
         })
 
-        const { url } = await api.upload.image({
-          data: { base64, contentType: file.type },
+        const { blobId, url } = await api.upload.image({
+          data: {
+            base64,
+            contentType: file.type as "image/png" | "image/jpeg" | "image/webp" | "image/gif",
+            fileName: file.name,
+          },
         })
 
-        const result = await api.prediction.create({ data: { imageUrl: url } })
+        const result = await api.prediction.create({
+          data: { imageUrl: url, inputBlobId: blobId },
+        })
         navigate({ to: "/g/$id", params: { id: result.id } })
       } catch (err) {
         console.error("Upload failed:", err)

@@ -1,6 +1,6 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers"
 import { eq } from "drizzle-orm"
-import { predictions, blobs } from "../lib/db/schema"
+import { predictions, blobs, predictionBlobs } from "../lib/db/schema"
 import { db } from "../lib/db"
 import { generateId } from "../lib/uuid"
 import { endpointSchemas } from "../lib/fal/schema"
@@ -22,7 +22,7 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
     const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
     const images = output.images
 
-    // Upload each image and create blob rows
+    // Upload each image, create blob record, and link to prediction
     for (const [index, image] of images.entries()) {
       await step.do(`upload-image-${index}`, async () => {
         const blobId = generateId()
@@ -36,14 +36,22 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
           httpMetadata: { contentType: image.content_type },
         })
 
+        // Create blob record
         await db.insert(blobs).values({
           id: blobId,
-          predictionId,
           contentType: image.content_type,
           fileName: image.file_name,
           fileSize: image.file_size,
           width: image.width,
           height: image.height,
+        })
+
+        // Link blob to prediction via join table
+        await db.insert(predictionBlobs).values({
+          predictionId,
+          blobId,
+          role: "output",
+          position: index,
         })
       })
     }
