@@ -5,7 +5,7 @@
    ```
    git commit -m "type: message
 
-   Co-authored-by: Cursor <noreply@cursor.com>"
+   Co-authored-by: Cursor <cursor@cursor.bot>"
    ```
 
 4. Push them to the remote
