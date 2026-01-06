@@ -70,7 +70,10 @@ const Route = createFileRoute("/g/$id")({
     ])
     return { prediction, predictions }
   },
-  component: GenerationPage,
+  component: function GenerationPageWrapper() {
+    const { prediction } = Route.useLoaderData()
+    return <GenerationPage key={prediction.id} />
+  },
 })
 
 export { Route }
