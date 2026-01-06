@@ -41,7 +41,7 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
           id: blobId,
           contentType: image.content_type,
           fileName: image.file_name,
-          fileSize: image.file_size,
+          fileSize: imageBlob.size,
           width: image.width,
           height: image.height,
         })
