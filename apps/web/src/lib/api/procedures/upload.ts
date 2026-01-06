@@ -2,10 +2,10 @@ import { createServerFn } from "@tanstack/react-start"
 import { env } from "cloudflare:workers"
 import { z } from "zod"
 
-import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
 import { db } from "../../db"
 import { blobs, contentTypeEnum } from "../../db/schema"
 import { generateId } from "../../uuid"
+import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
 
 // -----------------------------------------------------------------------------
 // Server Functions
@@ -50,7 +50,7 @@ const uploadImage = createServerFn({ method: "POST" })
       fileSize: imageBlob.size,
     })
 
-    // Return blob ID and public URL
+    // Return blob ID and public R2 URL
     const url = `${env.R2_PUBLIC_URL}/${blobId}`
     return { blobId, url }
   })

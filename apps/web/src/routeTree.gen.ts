@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GIdRouteImport } from './routes/g.$id'
+import { Route as ApiBlobsSplatRouteImport } from './routes/api/blobs/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const GIdRoute = GIdRouteImport.update({
   path: '/g/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBlobsSplatRoute = ApiBlobsSplatRouteImport.update({
+  id: '/api/blobs/$',
+  path: '/api/blobs/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -33,30 +39,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/g/$id': typeof GIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/blobs/$': typeof ApiBlobsSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/g/$id': typeof GIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/blobs/$': typeof ApiBlobsSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/g/$id': typeof GIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/blobs/$': typeof ApiBlobsSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/g/$id' | '/api/auth/$'
+  fullPaths: '/' | '/g/$id' | '/api/auth/$' | '/api/blobs/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/g/$id' | '/api/auth/$'
-  id: '__root__' | '/' | '/g/$id' | '/api/auth/$'
+  to: '/' | '/g/$id' | '/api/auth/$' | '/api/blobs/$'
+  id: '__root__' | '/' | '/g/$id' | '/api/auth/$' | '/api/blobs/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GIdRoute: typeof GIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBlobsSplatRoute: typeof ApiBlobsSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/blobs/$': {
+      id: '/api/blobs/$'
+      path: '/api/blobs/$'
+      fullPath: '/api/blobs/$'
+      preLoaderRoute: typeof ApiBlobsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GIdRoute: GIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBlobsSplatRoute: ApiBlobsSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
