@@ -39,11 +39,11 @@ const blobs = sqliteTable("blobs", {
     .$defaultFn(() => new Date()),
 })
 
-type Prediction = typeof predictions.$inferSelect
-type NewPrediction = typeof predictions.$inferInsert
-type Blob = typeof blobs.$inferSelect
-type NewBlob = typeof blobs.$inferInsert
+type PredictionRow = typeof predictions.$inferSelect
+type NewPredictionRow = typeof predictions.$inferInsert
+type BlobRow = typeof blobs.$inferSelect
+type NewBlobRow = typeof blobs.$inferInsert
 
 export * from "./auth.gen"
 export { predictions, blobs, contentTypeEnum, statusEnum, endpointIdEnum }
-export type { Prediction, NewPrediction, Blob, NewBlob }
+export type { PredictionRow, NewPredictionRow, BlobRow, NewBlobRow }

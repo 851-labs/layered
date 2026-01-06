@@ -4,7 +4,7 @@ import { useState, useCallback } from "react"
 import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
 import { HistorySidebar } from "../components/history-sidebar"
-import { getPrediction, getPredictions } from "../lib/boop"
+import { api } from "../lib/api"
 
 type LayerState = {
   url: string
@@ -16,7 +16,7 @@ function GenerationPage() {
   const { prediction, predictions } = Route.useLoaderData()
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
-    prediction.layers.map((url) => ({
+    prediction.layers.map((url: string) => ({
       url,
       visible: true,
       opacity: 1,
@@ -65,8 +65,8 @@ function GenerationPage() {
 const Route = createFileRoute("/g/$id")({
   loader: async ({ params }) => {
     const [prediction, { predictions }] = await Promise.all([
-      getPrediction({ data: { id: params.id } }),
-      getPredictions(),
+      api.prediction.get({ data: { id: params.id } }),
+      api.prediction.list(),
     ])
     return { prediction, predictions }
   },

@@ -1,13 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { Plus, Loader2 } from "lucide-react"
 import { useState, useCallback } from "react"
-import { uploadImage, runPrediction } from "../lib/boop"
 
-type Prediction = {
-  id: string
-  layers: string[]
-  createdAt: Date
-}
+import { api } from "../lib/api"
+import { type Prediction } from "../lib/api/schemas"
 
 type HistorySidebarProps = {
   predictions: Prediction[]
@@ -39,11 +35,11 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
           reader.readAsDataURL(file)
         })
 
-        const { url } = await uploadImage({
+        const { url } = await api.upload.image({
           data: { base64, contentType: file.type },
         })
 
-        const result = await runPrediction({ data: { imageUrl: url } })
+        const result = await api.prediction.create({ data: { imageUrl: url } })
         navigate({ to: "/g/$id", params: { id: result.id } })
       } catch (err) {
         console.error("Upload failed:", err)
@@ -108,4 +104,3 @@ function HistorySidebar({ predictions, currentId }: HistorySidebarProps) {
 }
 
 export { HistorySidebar }
-export type { Prediction }

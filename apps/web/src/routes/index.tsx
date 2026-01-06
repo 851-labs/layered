@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState, useCallback } from "react"
 import { Upload, Loader2, AlertCircle } from "lucide-react"
 
-import { uploadImage, runPrediction } from "../lib/boop"
+import { api } from "../lib/api"
 
 type ExampleCardProps = {
   example: { id: string; input: string; layers: string[] }
@@ -145,11 +145,11 @@ function App() {
           reader.readAsDataURL(file)
         })
 
-        const { url } = await uploadImage({
+        const { url } = await api.upload.image({
           data: { base64, contentType: file.type },
         })
 
-        const result = await runPrediction({ data: { imageUrl: url } })
+        const result = await api.prediction.create({ data: { imageUrl: url } })
 
         if (!result.layers || result.layers.length === 0) {
           throw new Error("No layers were extracted from the image")
