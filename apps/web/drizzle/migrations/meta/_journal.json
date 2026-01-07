@@ -36,6 +36,20 @@
       "when": 1767685755088,
       "tag": "0004_curvy_manta",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1767742599171,
+      "tag": "0005_far_lake",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1767743125135,
+      "tag": "0006_chief_mongoose",
+      "breakpoints": true
     }
   ]
 }

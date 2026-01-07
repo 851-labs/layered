@@ -12,11 +12,11 @@ type LayerState = {
   opacity: number
 }
 
-function GenerationPage() {
-  const { prediction, predictions } = Route.useLoaderData()
+function ProjectPage() {
+  const { project, projects } = Route.useLoaderData()
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
-    prediction.outputBlobs.map((blob) => ({
+    project.outputBlobs.map((blob) => ({
       url: blob.url,
       visible: true,
       opacity: 1,
@@ -44,7 +44,7 @@ function GenerationPage() {
   return (
     <div className="h-[calc(100vh-56px)] flex bg-stone-50">
       {/* Left sidebar: History */}
-      <HistorySidebar predictions={predictions} currentId={prediction.id} />
+      <HistorySidebar projects={projects} currentId={project.id} />
 
       {/* Center: 3D Viewer */}
       <div className="flex-1 flex items-center justify-center bg-stone-100/50">
@@ -62,17 +62,17 @@ function GenerationPage() {
   )
 }
 
-const Route = createFileRoute("/g/$id")({
+const Route = createFileRoute("/project/$id")({
   loader: async ({ params }) => {
-    const [prediction, { predictions }] = await Promise.all([
-      api.prediction.get({ data: { id: params.id } }),
-      api.prediction.list(),
+    const [project, { projects }] = await Promise.all([
+      api.project.get({ data: { id: params.id } }),
+      api.project.list(),
     ])
-    return { prediction, predictions }
+    return { project, projects }
   },
-  component: function GenerationPageWrapper() {
-    const { prediction } = Route.useLoaderData()
-    return <GenerationPage key={prediction.id} />
+  component: function ProjectPageWrapper() {
+    const { project } = Route.useLoaderData()
+    return <ProjectPage key={project.id} />
   },
 })
 

@@ -1,9 +1,9 @@
-import { predictionRouter } from "./procedures/predictions"
+import { projectRouter } from "./procedures/projects"
 import { uploadRouter } from "./procedures/upload"
 
 const api = {
   upload: uploadRouter,
-  prediction: predictionRouter,
+  project: projectRouter,
 }
 
 export { api }

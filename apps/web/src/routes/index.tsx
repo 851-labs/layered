@@ -25,10 +25,7 @@ function ExampleCard({ example, hasBorderRight }: ExampleCardProps) {
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={cn(
-        "aspect-square relative overflow-hidden border-b border-stone-200",
-        hasBorderRight && "border-r"
-      )}
+      className={cn("aspect-square relative overflow-hidden border-b border-stone-200", hasBorderRight && "border-r")}
       style={{ perspective: "900px" }}
     >
       <div
@@ -173,7 +170,7 @@ function App() {
           },
         })
 
-        const result = await api.prediction.create({
+        const result = await api.project.create({
           data: { imageUrl: url, inputBlobId: blobId },
         })
 
@@ -181,8 +178,8 @@ function App() {
           throw new Error("No layers were extracted from the image")
         }
 
-        // Navigate to the generation page
-        navigate({ to: "/g/$id", params: { id: result.id } })
+        // Navigate to the project page
+        navigate({ to: "/project/$id", params: { id: result.id } })
       } catch (err) {
         console.error("Processing failed:", err)
         setError(err instanceof Error ? err.message : "Failed to process image")

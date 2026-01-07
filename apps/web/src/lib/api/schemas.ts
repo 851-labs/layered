@@ -12,8 +12,9 @@ const blobSchema = z.object({
   height: z.number(),
 })
 
-const predictionSchema = z.object({
+const projectSchema = z.object({
   id: z.string(),
+  name: z.string().nullable(),
   inputBlob: blobSchema,
   outputBlobs: z.array(blobSchema),
   createdAt: z.date(),
@@ -24,7 +25,7 @@ const predictionSchema = z.object({
 // -----------------------------------------------------------------------------
 
 type Blob = z.infer<typeof blobSchema>
-type Prediction = z.infer<typeof predictionSchema>
+type Project = z.infer<typeof projectSchema>
 
-export { blobSchema, predictionSchema }
-export type { Blob, Prediction }
+export { blobSchema, projectSchema }
+export type { Blob, Project }

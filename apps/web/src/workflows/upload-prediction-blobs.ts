@@ -1,12 +1,16 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers"
 import { eq } from "drizzle-orm"
-import { predictions, blobs, predictionBlobs } from "../lib/db/schema"
+import { predictions, blobs, predictionBlobs, falEndpointIdEnum } from "../lib/db/schema"
 import { db } from "../lib/db"
 import { generateId } from "../lib/uuid"
 import { endpointSchemas } from "../lib/fal/schema"
 
 type Params = {
   predictionId: string
+}
+
+function isFalEndpoint(endpointId: string): endpointId is (typeof falEndpointIdEnum)[number] {
+  return (falEndpointIdEnum as readonly string[]).includes(endpointId)
 }
 
 class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
@@ -18,6 +22,15 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
     )
 
     if (!prediction) throw new Error(`Prediction ${predictionId} not found`)
+
+    // Only process fal endpoints that have image outputs
+    if (!isFalEndpoint(prediction.endpointId)) {
+      // Mark as completed for non-fal endpoints (no blobs to upload)
+      await step.do("update-prediction", async () => {
+        await db.update(predictions).set({ status: "completed" }).where(eq(predictions.id, predictionId))
+      })
+      return
+    }
 
     const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
     const images = output.images

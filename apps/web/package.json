@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.17.1",
-    "clsx": "^2.1.1",
     "@fal-ai/client": "^1.8.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "^0.9.0",
@@ -29,6 +28,7 @@
     "@tanstack/react-start": "^1.145.5",
     "@tanstack/router-plugin": "^1.145.4",
     "better-auth": "^1.4.10",
+    "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
     "lucide-react": "^0.562.0",
     "nanoid": "^5.1.6",
