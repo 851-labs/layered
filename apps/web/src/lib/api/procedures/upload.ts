@@ -4,7 +4,7 @@ import { z } from "zod"
 
 import { db } from "../../db"
 import { blobs, contentTypeEnum } from "../../db/schema"
-import { generateId } from "../../uuid"
+import { generateId } from "../../../utils/uuid"
 import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
 
 // -----------------------------------------------------------------------------

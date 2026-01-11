@@ -8,7 +8,7 @@ import { blobs, predictionBlobs, predictions, projects } from "../../db/schema"
 import { getFalClient } from "../../fal"
 import { endpointSchemas } from "../../fal/schema"
 import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
-import { type Blob, type Project } from "../schemas"
+import { type Blob, type Project } from "../schema"
 
 // -----------------------------------------------------------------------------
 // Constants

@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
-import { generateId } from "../../uuid"
+import { generateId } from "../../../utils/uuid"
 import { users } from "./auth.gen"
 
 const contentTypeEnum = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const

@@ -3,7 +3,7 @@ import { db } from "../db"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { env, waitUntil } from "cloudflare:workers"
-import { generateId } from "../uuid"
+import { generateId } from "../../utils/uuid"
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,

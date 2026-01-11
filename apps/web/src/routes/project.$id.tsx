@@ -5,6 +5,7 @@ import { LayerViewer3D } from "../components/layer-viewer-3d"
 import { LayerPanel } from "../components/layer-panel"
 import { HistorySidebar } from "../components/history-sidebar"
 import { api } from "../lib/api"
+import { type Blob } from "../lib/api/schema"
 
 type LayerState = {
   url: string
@@ -16,7 +17,7 @@ function ProjectPage() {
   const { project, projects } = Route.useLoaderData()
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
-    project.outputBlobs.map((blob) => ({
+    project.outputBlobs.map((blob: Blob) => ({
       url: blob.url,
       visible: true,
       opacity: 1,
