@@ -10,7 +10,6 @@
     "types:check": "tsc --noEmit",
     "types:generate": "wrangler types",
     "test": "vitest run",
-    "auth:generate": "bunx @better-auth/cli@latest generate --yes --config src/lib/auth/server.ts --output src/lib/db/schema/auth.gen.ts",
     "db:migrations:generate": "drizzle-kit generate",
     "db:migrations:list": "wrangler d1 migrations list DB --local",
     "db:migrations:list:prod": "wrangler d1 migrations list DB --remote",
