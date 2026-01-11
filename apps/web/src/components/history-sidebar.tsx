@@ -3,7 +3,7 @@ import { Plus, Loader2 } from "lucide-react"
 import { useState, useCallback } from "react"
 
 import { api } from "../lib/api"
-import { type Project } from "../lib/api/schemas"
+import { type Project } from "../lib/api/schema"
 import { cn } from "../lib/cn"
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const

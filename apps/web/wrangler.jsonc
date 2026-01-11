@@ -31,8 +31,8 @@
     }
   ],
   "vars": {
-    "R2_PUBLIC_URL": "https://layered.so/api/blobs",
-    "BETTER_AUTH_URL": "https://layered.so"
+    "BETTER_AUTH_URL": "https://layered.so",
+    "R2_PUBLIC_URL": "https://layered.so/api/blobs"
   },
   "d1_databases": [
     {
