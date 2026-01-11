@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import { RotateCcw, Move } from "lucide-react"
 
-import { cn } from "../lib/cn"
+import { cn } from "../utils/cn"
 
 type Layer = {
   url: string

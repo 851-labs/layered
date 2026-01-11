@@ -4,7 +4,7 @@ import { Upload, Loader2, AlertCircle } from "lucide-react"
 
 import { api } from "../lib/api"
 import { authClient } from "../lib/auth/client"
-import { cn } from "../lib/cn"
+import { cn } from "../utils/cn"
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
 type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number]

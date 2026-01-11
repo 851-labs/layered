@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react"
 import { Upload, Image as ImageIcon, Loader2 } from "lucide-react"
 
-import { cn } from "../lib/cn"
+import { cn } from "../utils/cn"
 
 type ImageUploadProps = {
   onImageSelected: (file: File) => void

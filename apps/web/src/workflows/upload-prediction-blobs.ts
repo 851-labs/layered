@@ -2,7 +2,7 @@ import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:work
 import { eq } from "drizzle-orm"
 import { predictions, blobs, predictionBlobs, falEndpointIdEnum } from "../lib/db/schema"
 import { db } from "../lib/db"
-import { generateId } from "../lib/uuid"
+import { generateId } from "../utils/uuid"
 import { endpointSchemas } from "../lib/fal/schema"
 
 type Params = {
