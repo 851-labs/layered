@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "layered",
-      "dependencies": {
-        "tailwind-merge": "^3.4.0",
-      },
       "devDependencies": {
         "turbo": "^2.7.2",
       },
