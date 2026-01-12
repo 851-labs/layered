@@ -10,9 +10,6 @@
       "dependsOn": ["^build"],
       "outputs": [".output/**", "dist/**"]
     },
-    "types:check": {
-      "cache": false
-    },
     "types:generate": {
       "cache": false
     }

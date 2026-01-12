@@ -1,83 +1,83 @@
-import { useState, useCallback } from "react"
-import { Upload, Image as ImageIcon, Loader2 } from "lucide-react"
+import { Upload, Image as ImageIcon, Loader2 } from "lucide-react";
+import { useState, useCallback } from "react";
 
-import { cn } from "../utils/cn"
+import { cn } from "../utils/cn";
 
 type ImageUploadProps = {
-  onImageSelected: (file: File) => void
-  isUploading?: boolean
-  disabled?: boolean
-}
+  onImageSelected: (file: File) => void;
+  isUploading?: boolean;
+  disabled?: boolean;
+};
 
 function ImageUpload({ onImageSelected, isUploading = false, disabled = false }: ImageUploadProps) {
-  const [isDragOver, setIsDragOver] = useState(false)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const handleFile = useCallback(
     (file: File) => {
       if (!file.type.startsWith("image/")) {
-        return
+        return;
       }
 
       // Create preview
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (e) => {
-        setPreview(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+        setPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
 
-      onImageSelected(file)
+      onImageSelected(file);
     },
-    [onImageSelected]
-  )
+    [onImageSelected],
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragOver(false)
+      e.preventDefault();
+      setIsDragOver(false);
 
-      if (disabled || isUploading) return
+      if (disabled || isUploading) return;
 
-      const file = e.dataTransfer.files[0]
+      const file = e.dataTransfer.files[0];
       if (file) {
-        handleFile(file)
+        handleFile(file);
       }
     },
-    [handleFile, disabled, isUploading]
-  )
+    [handleFile, disabled, isUploading],
+  );
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
-      e.preventDefault()
+      e.preventDefault();
       if (!disabled && !isUploading) {
-        setIsDragOver(true)
+        setIsDragOver(true);
       }
     },
-    [disabled, isUploading]
-  )
+    [disabled, isUploading],
+  );
 
   const handleDragLeave = useCallback(() => {
-    setIsDragOver(false)
-  }, [])
+    setIsDragOver(false);
+  }, []);
 
   const handleClick = useCallback(() => {
-    if (disabled || isUploading) return
+    if (disabled || isUploading) return;
 
-    const input = document.createElement("input")
-    input.type = "file"
-    input.accept = "image/*"
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
     input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
+      const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        handleFile(file)
+        handleFile(file);
       }
-    }
-    input.click()
-  }, [handleFile, disabled, isUploading])
+    };
+    input.click();
+  }, [handleFile, disabled, isUploading]);
 
   const reset = useCallback(() => {
-    setPreview(null)
-  }, [])
+    setPreview(null);
+  }, []);
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -91,7 +91,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
           isDragOver
             ? "border-amber-400 bg-amber-400/10 scale-[1.02]"
             : "border-zinc-600 hover:border-zinc-500 bg-zinc-900/50",
-          (disabled || isUploading) && "opacity-50 cursor-not-allowed"
+          (disabled || isUploading) && "opacity-50 cursor-not-allowed",
         )}
       >
         {preview ? (
@@ -111,7 +111,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
             <div
               className={cn(
                 "p-4 rounded-full transition-colors",
-                isDragOver ? "bg-amber-400/20" : "bg-zinc-800"
+                isDragOver ? "bg-amber-400/20" : "bg-zinc-800",
               )}
             >
               {isDragOver ? (
@@ -140,8 +140,8 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
       {preview && !isUploading && (
         <button
           onClick={(e) => {
-            e.stopPropagation()
-            reset()
+            e.stopPropagation();
+            reset();
           }}
           className="mt-3 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
         >
@@ -149,7 +149,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
         </button>
       )}
     </div>
-  )
+  );
 }
 
-export { ImageUpload }
+export { ImageUpload };

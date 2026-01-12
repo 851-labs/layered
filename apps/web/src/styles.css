@@ -13,16 +13,29 @@ html {
 
 body {
   @apply m-0 bg-stone-50 text-stone-900;
-  font-family: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    "Inter Variable",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
 }
 
 /* Grid background pattern */
 .grid-bg {
-  background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 100% 80px, calc(100% / 3) 100%;
-  background-position: 0 0, 0 0;
+  background-size:
+    100% 80px,
+    calc(100% / 3) 100%;
+  background-position:
+    0 0,
+    0 0;
 }
 
 /* Grid container with visible lines */
@@ -63,10 +76,15 @@ body {
 
 /* Checkerboard for transparency preview */
 .checkerboard {
-  background-image: linear-gradient(45deg, #e5e5e5 25%, transparent 25%),
+  background-image:
+    linear-gradient(45deg, #e5e5e5 25%, transparent 25%),
     linear-gradient(-45deg, #e5e5e5 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #e5e5e5 75%),
     linear-gradient(-45deg, transparent 75%, #e5e5e5 75%);
   background-size: 16px 16px;
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0px;
 }

@@ -1,53 +1,57 @@
-import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers"
-import { eq } from "drizzle-orm"
-import { predictions, blobs, predictionBlobs, falEndpointIdEnum } from "../lib/db/schema"
-import { db } from "../lib/db"
-import { generateId } from "../utils/uuid"
-import { endpointSchemas } from "../lib/fal/schema"
+import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+
+import { db } from "../lib/db";
+import { predictions, blobs, predictionBlobs, falEndpointIdEnum } from "../lib/db/schema";
+import { endpointSchemas } from "../lib/fal/schema";
+import { generateId } from "../utils/uuid";
 
 type Params = {
-  predictionId: string
-}
+  predictionId: string;
+};
 
 function isFalEndpoint(endpointId: string): endpointId is (typeof falEndpointIdEnum)[number] {
-  return (falEndpointIdEnum as readonly string[]).includes(endpointId)
+  return (falEndpointIdEnum as readonly string[]).includes(endpointId);
 }
 
 class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
   async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-    const { predictionId } = event.payload
+    const { predictionId } = event.payload;
 
     const prediction = await step.do("fetch-prediction", async () =>
-      db.select().from(predictions).where(eq(predictions.id, predictionId)).get()
-    )
+      db.select().from(predictions).where(eq(predictions.id, predictionId)).get(),
+    );
 
-    if (!prediction) throw new Error(`Prediction ${predictionId} not found`)
+    if (!prediction) throw new Error(`Prediction ${predictionId} not found`);
 
     // Only process fal endpoints that have image outputs
     if (!isFalEndpoint(prediction.endpointId)) {
       // Mark as completed for non-fal endpoints (no blobs to upload)
       await step.do("update-prediction", async () => {
-        await db.update(predictions).set({ status: "completed" }).where(eq(predictions.id, predictionId))
-      })
-      return
+        await db
+          .update(predictions)
+          .set({ status: "completed" })
+          .where(eq(predictions.id, predictionId));
+      });
+      return;
     }
 
-    const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output))
-    const images = output.images
+    const output = endpointSchemas[prediction.endpointId].parse(JSON.parse(prediction.output));
+    const images = output.images;
 
     // Upload each image, create blob record, and link to prediction
     for (const [index, image] of images.entries()) {
       await step.do(`upload-image-${index}`, async () => {
-        const blobId = generateId()
+        const blobId = generateId();
 
         // Fetch image from fal URL
-        const response = await fetch(image.url)
-        const imageBlob = await response.blob()
+        const response = await fetch(image.url);
+        const imageBlob = await response.blob();
 
         // Upload to R2 using blob ID as key
         await this.env.BUCKET.put(blobId, imageBlob, {
           httpMetadata: { contentType: image.content_type },
-        })
+        });
 
         // Create blob record
         await db.insert(blobs).values({
@@ -57,7 +61,7 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
           fileSize: imageBlob.size,
           width: image.width,
           height: image.height,
-        })
+        });
 
         // Link blob to prediction via join table
         await db.insert(predictionBlobs).values({
@@ -65,15 +69,18 @@ class UploadPredictionBlobsWorkflow extends WorkflowEntrypoint<Env, Params> {
           blobId,
           role: "output",
           position: index,
-        })
-      })
+        });
+      });
     }
 
     // Mark prediction as completed
     await step.do("update-prediction", async () => {
-      await db.update(predictions).set({ status: "completed" }).where(eq(predictions.id, predictionId))
-    })
+      await db
+        .update(predictions)
+        .set({ status: "completed" })
+        .where(eq(predictions.id, predictionId));
+    });
   }
 }
 
-export { UploadPredictionBlobsWorkflow }
+export { UploadPredictionBlobsWorkflow };

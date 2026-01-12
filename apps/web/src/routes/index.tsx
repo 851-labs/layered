@@ -1,31 +1,34 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useState, useCallback } from "react"
-import { Upload, Loader2, AlertCircle } from "lucide-react"
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Upload, Loader2, AlertCircle } from "lucide-react";
+import { useState, useCallback } from "react";
 
-import { api } from "../lib/api"
-import { authClient } from "../lib/auth/client"
-import { cn } from "../utils/cn"
+import { api } from "../lib/api";
+import { authClient } from "../lib/auth/client";
+import { cn } from "../utils/cn";
 
-const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
-type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number]
+const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
+type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number];
 
 function isSupportedContentType(type: string): type is SupportedContentType {
-  return SUPPORTED_CONTENT_TYPES.includes(type as SupportedContentType)
+  return SUPPORTED_CONTENT_TYPES.includes(type as SupportedContentType);
 }
 
 type ExampleCardProps = {
-  example: { id: string; input: string; layers: string[] }
-  hasBorderRight: boolean
-}
+  example: { id: string; input: string; layers: string[] };
+  hasBorderRight: boolean;
+};
 
 function ExampleCard({ example, hasBorderRight }: ExampleCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={cn("aspect-square relative overflow-hidden border-b border-stone-200", hasBorderRight && "border-r")}
+      className={cn(
+        "aspect-square relative overflow-hidden border-b border-stone-200",
+        hasBorderRight && "border-r",
+      )}
       style={{ perspective: "900px" }}
     >
       <div
@@ -38,10 +41,10 @@ function ExampleCard({ example, hasBorderRight }: ExampleCardProps) {
         }}
       >
         {example.layers.map((layer, layerIndex) => {
-          const spacing = 15
-          const depthSpacing = 40
-          const depth = isHovered ? 0 : layerIndex * depthSpacing
-          const xOffset = isHovered ? 0 : layerIndex * spacing
+          const spacing = 15;
+          const depthSpacing = 40;
+          const depth = isHovered ? 0 : layerIndex * depthSpacing;
+          const xOffset = isHovered ? 0 : layerIndex * spacing;
 
           return (
             <img
@@ -57,18 +60,19 @@ function ExampleCard({ example, hasBorderRight }: ExampleCardProps) {
                 boxShadow: isHovered ? "none" : "0 4px 20px rgba(0, 0, 0, 0.15)",
               }}
             />
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 // Example images to showcase (6 examples for the 3x2 grid)
 const EXAMPLES = [
   {
     id: "1",
-    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    input:
+      "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
     layers: [
       "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
       "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
@@ -78,7 +82,8 @@ const EXAMPLES = [
   },
   {
     id: "2",
-    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    input:
+      "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
     layers: [
       "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
       "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
@@ -88,7 +93,8 @@ const EXAMPLES = [
   },
   {
     id: "3",
-    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    input:
+      "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
     layers: [
       "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
       "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
@@ -98,7 +104,8 @@ const EXAMPLES = [
   },
   {
     id: "4",
-    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    input:
+      "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
     layers: [
       "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
       "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
@@ -108,7 +115,8 @@ const EXAMPLES = [
   },
   {
     id: "5",
-    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    input:
+      "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
     layers: [
       "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
       "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
@@ -118,7 +126,8 @@ const EXAMPLES = [
   },
   {
     id: "6",
-    input: "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
+    input:
+      "https://replicate.delivery/pbxt/OGJS6oNSRRCreFyh6zqtSHcnRLSKPYRBE21H0p72qzoocduq/couple-in-field.png",
     layers: [
       "https://replicate.delivery/xezq/Ci603GTf5kU4V61PU6dcHFZOupLS4ikrAn5x0RCGZvg86Z6KA/out-0.webp",
       "https://replicate.delivery/xezq/LRxbPqWEZhLoC95xridbviBBmj3JDt72G3WSPGUudCUe6Z6KA/out-1.webp",
@@ -126,41 +135,43 @@ const EXAMPLES = [
       "https://replicate.delivery/xezq/RMRT4pGJzRaUIVdxyOfsPI2Y1ioxfKIcgSez0eMTY70nXPTXB/out-3.webp",
     ],
   },
-]
+];
 
 function App() {
-  const navigate = useNavigate()
-  const { data: session } = authClient.useSession()
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const { data: session } = authClient.useSession();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleImageSelected = useCallback(
     async (file: File) => {
       // Check if user is logged in
       if (!session?.user) {
-        setError("Please sign in to upload images")
-        return
+        setError("Please sign in to upload images");
+        return;
       }
 
-      setIsProcessing(true)
-      setError(null)
+      setIsProcessing(true);
+      setError(null);
 
       try {
         // Validate content type
         if (!isSupportedContentType(file.type)) {
-          throw new Error(`Unsupported image format: ${file.type || "unknown"}. Please use PNG, JPEG, WebP, or GIF.`)
+          throw new Error(
+            `Unsupported image format: ${file.type || "unknown"}. Please use PNG, JPEG, WebP, or GIF.`,
+          );
         }
 
         const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
+          const reader = new FileReader();
           reader.onload = () => {
-            const result = reader.result as string
-            const base64Data = result.split(",")[1]
-            resolve(base64Data)
-          }
-          reader.onerror = reject
-          reader.readAsDataURL(file)
-        })
+            const result = reader.result as string;
+            const base64Data = result.split(",")[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
         const { blobId, url } = await api.upload.image({
           data: {
@@ -168,37 +179,37 @@ function App() {
             contentType: file.type,
             fileName: file.name,
           },
-        })
+        });
 
         const result = await api.project.create({
           data: { imageUrl: url, inputBlobId: blobId },
-        })
+        });
 
         if (!result.outputBlobs || result.outputBlobs.length === 0) {
-          throw new Error("No layers were extracted from the image")
+          throw new Error("No layers were extracted from the image");
         }
 
         // Navigate to the project page
-        navigate({ to: "/project/$id", params: { id: result.id } })
+        navigate({ to: "/project/$id", params: { id: result.id } });
       } catch (err) {
-        console.error("Processing failed:", err)
-        setError(err instanceof Error ? err.message : "Failed to process image")
-        setIsProcessing(false)
+        console.error("Processing failed:", err);
+        setError(err instanceof Error ? err.message : "Failed to process image");
+        setIsProcessing(false);
       }
     },
-    [navigate, session]
-  )
+    [navigate, session],
+  );
 
   const handleUploadClick = () => {
-    const input = document.createElement("input")
-    input.type = "file"
-    input.accept = "image/png,image/jpeg,image/webp,image/gif"
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/png,image/jpeg,image/webp,image/gif";
     input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) handleImageSelected(file)
-    }
-    input.click()
-  }
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) handleImageSelected(file);
+    };
+    input.click();
+  };
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -226,7 +237,7 @@ function App() {
                   "w-16 h-16 rounded-2xl border-2 border-dashed flex items-center justify-center transition-colors",
                   isProcessing
                     ? "border-stone-300 bg-stone-100"
-                    : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100"
+                    : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100",
                 )}
               >
                 {isProcessing ? (
@@ -236,7 +247,9 @@ function App() {
                 )}
               </div>
               <div className="text-center">
-                <p className="text-stone-600 font-medium">{isProcessing ? "Processing..." : "Upload an image"}</p>
+                <p className="text-stone-600 font-medium">
+                  {isProcessing ? "Processing..." : "Upload an image"}
+                </p>
                 <p className="text-sm text-stone-400 mt-1">Drag and drop or click to browse</p>
               </div>
             </button>
@@ -258,9 +271,9 @@ function App() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-const Route = createFileRoute("/")({ component: App })
+const Route = createFileRoute("/")({ component: App });
 
-export { Route }
+export { Route };

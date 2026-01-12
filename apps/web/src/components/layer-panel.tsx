@@ -1,19 +1,19 @@
-import { Eye, EyeOff, Focus } from "lucide-react"
+import { Eye, EyeOff, Focus } from "lucide-react";
 
-import { cn } from "../utils/cn"
+import { cn } from "../utils/cn";
 
 type Layer = {
-  url: string
-  visible: boolean
-  opacity: number
-}
+  url: string;
+  visible: boolean;
+  opacity: number;
+};
 
 type LayerPanelProps = {
-  layers: Layer[]
-  onToggleVisibility: (index: number) => void
-  onOpacityChange: (index: number, opacity: number) => void
-  onSolo: (index: number) => void
-}
+  layers: Layer[];
+  onToggleVisibility: (index: number) => void;
+  onOpacityChange: (index: number, opacity: number) => void;
+  onSolo: (index: number) => void;
+};
 
 function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: LayerPanelProps) {
   return (
@@ -30,13 +30,19 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
             key={index}
             className={cn(
               "p-2 rounded-lg border transition-all duration-200",
-              layer.visible ? "bg-white border-stone-200" : "bg-stone-100 border-stone-200/60 opacity-60"
+              layer.visible
+                ? "bg-white border-stone-200"
+                : "bg-stone-100 border-stone-200/60 opacity-60",
             )}
           >
             <div className="flex gap-3">
               {/* Thumbnail */}
               <div className="w-12 h-12 rounded overflow-hidden bg-stone-200 shrink-0 checkerboard">
-                <img src={layer.url} alt={`Layer ${index + 1}`} className="w-full h-full object-contain" />
+                <img
+                  src={layer.url}
+                  alt={`Layer ${index + 1}`}
+                  className="w-full h-full object-contain"
+                />
               </div>
 
               {/* Controls */}
@@ -44,7 +50,9 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
                 {/* Layer info row */}
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-stone-700">Layer {index + 1}</span>
-                  <span className="text-[10px] text-stone-400">{Math.round(layer.opacity * 100)}%</span>
+                  <span className="text-[10px] text-stone-400">
+                    {Math.round(layer.opacity * 100)}%
+                  </span>
                 </div>
 
                 {/* Opacity slider */}
@@ -59,7 +67,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
                     "w-full h-1 rounded-full appearance-none cursor-pointer bg-stone-200",
                     "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3",
                     "[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-900 [&::-webkit-slider-thumb]:cursor-pointer",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
                   )}
                 />
 
@@ -90,7 +98,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export { LayerPanel }
+export { LayerPanel };

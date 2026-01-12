@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 // -----------------------------------------------------------------------------
 // Entity Schemas (for normalized store)
@@ -10,7 +10,7 @@ const blobSchema = z.object({
   contentType: z.string(),
   width: z.number(),
   height: z.number(),
-})
+});
 
 const projectSchema = z.object({
   id: z.string(),
@@ -18,14 +18,14 @@ const projectSchema = z.object({
   inputBlob: blobSchema,
   outputBlobs: z.array(blobSchema),
   createdAt: z.date(),
-})
+});
 
 // -----------------------------------------------------------------------------
 // Inferred Types
 // -----------------------------------------------------------------------------
 
-type Blob = z.infer<typeof blobSchema>
-type Project = z.infer<typeof projectSchema>
+type Blob = z.infer<typeof blobSchema>;
+type Project = z.infer<typeof projectSchema>;
 
-export { blobSchema, projectSchema }
-export type { Blob, Project }
+export { blobSchema, projectSchema };
+export type { Blob, Project };

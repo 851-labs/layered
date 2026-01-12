@@ -1,26 +1,27 @@
-import { createServerFn } from "@tanstack/react-start"
-import { env } from "cloudflare:workers"
-import { asc, desc, eq } from "drizzle-orm"
-import { z } from "zod"
+import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
+import { asc, desc, eq } from "drizzle-orm";
+import { z } from "zod";
 
-import { db } from "../../db"
-import { blobs, predictionBlobs, predictions, projects } from "../../db/schema"
-import { getFalClient } from "../../fal"
-import { endpointSchemas } from "../../fal/schema"
-import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
-import { type Blob, type Project } from "../schema"
+import { db } from "../../db";
+import { blobs, predictionBlobs, predictions, projects } from "../../db/schema";
+import { getFalClient } from "../../fal";
+import { endpointSchemas } from "../../fal/schema";
+import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware";
+import { type Blob, type Project } from "../schema";
 
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
 
-const IMAGE_ENDPOINT_ID = "fal-ai/qwen-image-layered"
-const NAME_ENDPOINT_ID = "openai/gpt-4o-mini"
-const AI_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/630f294bcb2c1e9b751d9fe0655a453a/layered/openai"
+const IMAGE_ENDPOINT_ID = "fal-ai/qwen-image-layered";
+const NAME_ENDPOINT_ID = "openai/gpt-4o-mini";
+const AI_GATEWAY_URL =
+  "https://gateway.ai.cloudflare.com/v1/630f294bcb2c1e9b751d9fe0655a453a/layered/openai";
 
 type OpenAIChatResponse = {
-  choices: Array<{ message: { content: string } }>
-}
+  choices: Array<{ message: { content: string } }>;
+};
 
 async function generateProjectName(imageUrl: string): Promise<string | null> {
   const response = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
@@ -45,15 +46,15 @@ async function generateProjectName(imageUrl: string): Promise<string | null> {
       ],
       max_tokens: 20,
     }),
-  })
+  });
 
   if (!response.ok) {
-    console.error("Failed to generate project name:", await response.text())
-    return null
+    console.error("Failed to generate project name:", await response.text());
+    return null;
   }
 
-  const data = (await response.json()) as OpenAIChatResponse
-  return data.choices[0]?.message?.content?.trim() ?? null
+  const data = (await response.json()) as OpenAIChatResponse;
+  return data.choices[0]?.message?.content?.trim() ?? null;
 }
 
 // -----------------------------------------------------------------------------
@@ -61,12 +62,12 @@ async function generateProjectName(imageUrl: string): Promise<string | null> {
 // -----------------------------------------------------------------------------
 
 type BlobWithRole = {
-  id: string
-  contentType: string
-  width: number
-  height: number
-  role: "input" | "output"
-}
+  id: string;
+  contentType: string;
+  width: number;
+  height: number;
+  role: "input" | "output";
+};
 
 function toPublicBlob(blob: Omit<BlobWithRole, "role">): Blob {
   return {
@@ -75,25 +76,25 @@ function toPublicBlob(blob: Omit<BlobWithRole, "role">): Blob {
     contentType: blob.contentType,
     width: blob.width,
     height: blob.height,
-  }
+  };
 }
 
 function getOutputBlobs(prediction: {
-  outputBlobRows: Array<Omit<BlobWithRole, "role">>
-  output: string
-  status: "processing" | "completed" | "failed"
+  outputBlobRows: Array<Omit<BlobWithRole, "role">>;
+  output: string;
+  status: "processing" | "completed" | "failed";
 }): Blob[] {
   if (prediction.status === "completed") {
-    return prediction.outputBlobRows.map(toPublicBlob)
+    return prediction.outputBlobRows.map(toPublicBlob);
   }
-  const output = endpointSchemas[IMAGE_ENDPOINT_ID].parse(JSON.parse(prediction.output))
+  const output = endpointSchemas[IMAGE_ENDPOINT_ID].parse(JSON.parse(prediction.output));
   return output.images.map((img, idx) => ({
     id: `fal-${idx}`,
     url: img.url,
     contentType: "image/png",
     width: img.width,
     height: img.height,
-  }))
+  }));
 }
 
 // -----------------------------------------------------------------------------
@@ -107,30 +108,30 @@ const createProject = createServerFn({ method: "POST" })
   .middleware([errorHandlingMiddleware, throwIfUnauthenticatedMiddleware])
   .inputValidator(z.object({ imageUrl: z.url(), inputBlobId: z.string() }))
   .handler(async ({ data, context }): Promise<Project> => {
-    const { imageUrl, inputBlobId } = data
+    const { imageUrl, inputBlobId } = data;
 
     // Create project first
     const [project] = await db
       .insert(projects)
       .values({ userId: context.session.user.id })
-      .returning({ id: projects.id, createdAt: projects.createdAt })
+      .returning({ id: projects.id, createdAt: projects.createdAt });
 
-    const fal = getFalClient()
+    const fal = getFalClient();
 
     // Run image layering and name generation in parallel
     const [imageResult, generatedName] = await Promise.all([
       fal.subscribe(IMAGE_ENDPOINT_ID, { input: { image_url: imageUrl } }),
       generateProjectName(imageUrl),
-    ])
+    ]);
 
-    const imageOutput = endpointSchemas[IMAGE_ENDPOINT_ID].parse(imageResult.data)
+    const imageOutput = endpointSchemas[IMAGE_ENDPOINT_ID].parse(imageResult.data);
     if (!imageOutput.images || imageOutput.images.length === 0) {
-      throw new Error("No images returned from the model")
+      throw new Error("No images returned from the model");
     }
 
     // Update project with the generated name (if we got one)
     if (generatedName) {
-      await db.update(projects).set({ name: generatedName }).where(eq(projects.id, project.id))
+      await db.update(projects).set({ name: generatedName }).where(eq(projects.id, project.id));
     }
 
     // Store image prediction
@@ -143,7 +144,7 @@ const createProject = createServerFn({ method: "POST" })
         input: JSON.stringify({ image_url: imageUrl }),
         output: JSON.stringify(imageOutput),
       })
-      .returning({ id: predictions.id })
+      .returning({ id: predictions.id });
 
     // Store name prediction for audit
     await db.insert(predictions).values({
@@ -153,7 +154,7 @@ const createProject = createServerFn({ method: "POST" })
       input: JSON.stringify({ imageUrl, model: "gpt-4o-mini" }),
       output: JSON.stringify({ name: generatedName }),
       status: "completed",
-    })
+    });
 
     // Link input blob to image prediction
     await db.insert(predictionBlobs).values({
@@ -161,7 +162,7 @@ const createProject = createServerFn({ method: "POST" })
       blobId: inputBlobId,
       role: "input",
       position: 0,
-    })
+    });
 
     // Fetch the input blob data
     const inputBlobRow = await db
@@ -173,14 +174,14 @@ const createProject = createServerFn({ method: "POST" })
       })
       .from(blobs)
       .where(eq(blobs.id, inputBlobId))
-      .get()
+      .get();
 
-    if (!inputBlobRow) throw new Error("Input blob not found")
+    if (!inputBlobRow) throw new Error("Input blob not found");
 
     // Trigger background workflow to upload output blobs to R2
     await env.UPLOAD_PREDICTION_BLOBS_WORKFLOW.create({
       params: { predictionId: imagePrediction.id },
-    })
+    });
 
     return {
       id: project.id,
@@ -194,8 +195,8 @@ const createProject = createServerFn({ method: "POST" })
         height: img.height,
       })),
       createdAt: project.createdAt,
-    }
-  })
+    };
+  });
 
 /**
  * Get a single project by ID.
@@ -204,8 +205,8 @@ const getProject = createServerFn({ method: "GET" })
   .middleware([errorHandlingMiddleware])
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }): Promise<Project> => {
-    const project = await db.select().from(projects).where(eq(projects.id, data.id)).get()
-    if (!project) throw new Error("Project not found")
+    const project = await db.select().from(projects).where(eq(projects.id, data.id)).get();
+    if (!project) throw new Error("Project not found");
 
     // Get the image prediction for this project
     const imagePrediction = await db
@@ -213,9 +214,9 @@ const getProject = createServerFn({ method: "GET" })
       .from(predictions)
       .where(eq(predictions.projectId, project.id))
       .orderBy(asc(predictions.createdAt))
-      .get()
+      .get();
 
-    if (!imagePrediction) throw new Error("Image prediction not found")
+    if (!imagePrediction) throw new Error("Image prediction not found");
 
     // Get blobs with full data via join
     const blobRows = await db
@@ -229,12 +230,12 @@ const getProject = createServerFn({ method: "GET" })
       .from(predictionBlobs)
       .innerJoin(blobs, eq(predictionBlobs.blobId, blobs.id))
       .where(eq(predictionBlobs.predictionId, imagePrediction.id))
-      .orderBy(asc(predictionBlobs.position))
+      .orderBy(asc(predictionBlobs.position));
 
-    const outputBlobRows = blobRows.filter((b) => b.role === "output")
-    const inputBlobRow = blobRows.find((b) => b.role === "input")
+    const outputBlobRows = blobRows.filter((b) => b.role === "output");
+    const inputBlobRow = blobRows.find((b) => b.role === "input");
 
-    if (!inputBlobRow) throw new Error("Input blob not found")
+    if (!inputBlobRow) throw new Error("Input blob not found");
 
     return {
       id: project.id,
@@ -246,8 +247,8 @@ const getProject = createServerFn({ method: "GET" })
         status: imagePrediction.status,
       }),
       createdAt: project.createdAt,
-    }
-  })
+    };
+  });
 
 /**
  * Get recent projects from the database.
@@ -255,7 +256,7 @@ const getProject = createServerFn({ method: "GET" })
 const listProjects = createServerFn({ method: "GET" })
   .middleware([errorHandlingMiddleware])
   .handler(async (): Promise<{ projects: Project[] }> => {
-    const projectRows = await db.select().from(projects).orderBy(desc(projects.createdAt)).limit(6)
+    const projectRows = await db.select().from(projects).orderBy(desc(projects.createdAt)).limit(6);
 
     const projectsWithData = await Promise.all(
       projectRows.map(async (project) => {
@@ -264,9 +265,9 @@ const listProjects = createServerFn({ method: "GET" })
           .from(predictions)
           .where(eq(predictions.projectId, project.id))
           .orderBy(asc(predictions.createdAt))
-          .get()
+          .get();
 
-        if (!imagePrediction) throw new Error(`Prediction not found for project ${project.id}`)
+        if (!imagePrediction) throw new Error(`Prediction not found for project ${project.id}`);
 
         const blobRows = await db
           .select({
@@ -279,12 +280,12 @@ const listProjects = createServerFn({ method: "GET" })
           .from(predictionBlobs)
           .innerJoin(blobs, eq(predictionBlobs.blobId, blobs.id))
           .where(eq(predictionBlobs.predictionId, imagePrediction.id))
-          .orderBy(asc(predictionBlobs.position))
+          .orderBy(asc(predictionBlobs.position));
 
-        const outputBlobRows = blobRows.filter((b) => b.role === "output")
-        const inputBlobRow = blobRows.find((b) => b.role === "input")
+        const outputBlobRows = blobRows.filter((b) => b.role === "output");
+        const inputBlobRow = blobRows.find((b) => b.role === "input");
 
-        if (!inputBlobRow) throw new Error(`Input blob not found for project ${project.id}`)
+        if (!inputBlobRow) throw new Error(`Input blob not found for project ${project.id}`);
 
         return {
           id: project.id,
@@ -296,12 +297,12 @@ const listProjects = createServerFn({ method: "GET" })
             status: imagePrediction.status,
           }),
           createdAt: project.createdAt,
-        }
-      })
-    )
+        };
+      }),
+    );
 
-    return { projects: projectsWithData }
-  })
+    return { projects: projectsWithData };
+  });
 
 // -----------------------------------------------------------------------------
 // Router
@@ -311,6 +312,6 @@ const projectRouter = {
   create: createProject,
   get: getProject,
   list: listProjects,
-}
+};
 
-export { projectRouter }
+export { projectRouter };

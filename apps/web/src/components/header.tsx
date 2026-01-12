@@ -1,9 +1,10 @@
-import { Link } from "@tanstack/react-router"
-import { Github } from "lucide-react"
-import { authClient } from "../lib/auth/client"
+import { Link } from "@tanstack/react-router";
+import { Github } from "lucide-react";
+
+import { authClient } from "../lib/auth/client";
 
 function Header() {
-  const { data: session } = authClient.useSession()
+  const { data: session } = authClient.useSession();
 
   return (
     <header className="h-14 border-b border-stone-200/60 bg-stone-50/80 backdrop-blur-sm sticky top-0 z-50">
@@ -24,7 +25,11 @@ function Header() {
           </a>
 
           {session?.user ? (
-            <img src={session.user.image ?? ""} alt={session.user.name ?? ""} className="w-8 h-8 rounded-full" />
+            <img
+              src={session.user.image ?? ""}
+              alt={session.user.name ?? ""}
+              className="w-8 h-8 rounded-full"
+            />
           ) : (
             <button
               onClick={() => authClient.signIn.social({ provider: "google" })}
@@ -36,7 +41,7 @@ function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }
 
-export { Header }
+export { Header };

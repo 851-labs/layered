@@ -1,9 +1,9 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
-import { configure } from "onedollarstats"
-import { useEffect } from "react"
+import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import { configure } from "onedollarstats";
+import { useEffect } from "react";
 
-import { Header } from "../components/header"
-import appCss from "../styles.css?url"
+import { Header } from "../components/header";
+import appCss from "../styles.css?url";
 
 const Route = createRootRoute({
   head: () => ({
@@ -20,7 +20,8 @@ const Route = createRootRoute({
       },
       {
         name: "description",
-        content: "Decompose any image into editable layers using AI. Powered by Qwen-Image-Layered.",
+        content:
+          "Decompose any image into editable layers using AI. Powered by Qwen-Image-Layered.",
       },
     ],
     links: [
@@ -32,12 +33,12 @@ const Route = createRootRoute({
   }),
 
   shellComponent: RootDocument,
-})
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    configure({ trackLocalhostAs: "layered.test" })
-  }, [])
+    configure({ trackLocalhostAs: "layered.test" });
+  }, []);
 
   return (
     <html lang="en">
@@ -50,7 +51,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
 
-export { Route }
+export { Route };

@@ -1,66 +1,66 @@
-import { useState, useRef, useEffect } from "react"
-import { RotateCcw, Move } from "lucide-react"
+import { RotateCcw, Move } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
-import { cn } from "../utils/cn"
+import { cn } from "../utils/cn";
 
 type Layer = {
-  url: string
-  visible: boolean
-  opacity: number
-}
+  url: string;
+  visible: boolean;
+  opacity: number;
+};
 
 type LayerViewer3DProps = {
-  layers: Layer[]
-  className?: string
-}
+  layers: Layer[];
+  className?: string;
+};
 
 function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [rotation, setRotation] = useState({ x: 15, y: -25 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [spread, setSpread] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [rotation, setRotation] = useState({ x: 15, y: -25 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [spread, setSpread] = useState(0);
 
   // Animate spread on mount and when layers change
   useEffect(() => {
-    setSpread(0)
-    const timer = setTimeout(() => setSpread(1), 100)
-    return () => clearTimeout(timer)
-  }, [layers])
+    setSpread(0);
+    const timer = setTimeout(() => setSpread(1), 100);
+    return () => clearTimeout(timer);
+  }, [layers]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
-    setDragStart({ x: e.clientX, y: e.clientY })
-  }
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return
+    if (!isDragging) return;
 
-    const deltaX = e.clientX - dragStart.x
-    const deltaY = e.clientY - dragStart.y
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
 
     setRotation((prev) => ({
       x: Math.max(-60, Math.min(60, prev.x - deltaY * 0.3)),
       y: prev.y + deltaX * 0.3,
-    }))
+    }));
 
-    setDragStart({ x: e.clientX, y: e.clientY })
-  }
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
 
   const handleMouseUp = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleMouseLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const resetRotation = () => {
-    setRotation({ x: 15, y: -25 })
-  }
+    setRotation({ x: 15, y: -25 });
+  };
 
-  const visibleLayers = layers.filter((l) => l.visible)
-  const layerSpacing = 50 * spread
+  const visibleLayers = layers.filter((l) => l.visible);
+  const layerSpacing = 50 * spread;
 
   return (
     <div className={cn("relative", className)}>
@@ -90,7 +90,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
         onMouseLeave={handleMouseLeave}
         className={cn(
           "w-full h-full min-h-[300px] flex items-center justify-center cursor-grab select-none",
-          isDragging && "cursor-grabbing"
+          isDragging && "cursor-grabbing",
         )}
         style={{ perspective: "1200px" }}
       >
@@ -102,7 +102,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
           }}
         >
           {visibleLayers.map((layer, index) => {
-            const zOffset = (visibleLayers.length - 1 - index) * layerSpacing
+            const zOffset = (visibleLayers.length - 1 - index) * layerSpacing;
 
             return (
               <div
@@ -124,12 +124,12 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
                   draggable={false}
                 />
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export { LayerViewer3D }
+export { LayerViewer3D };

@@ -1,7 +1,7 @@
-import { relations, sql } from "drizzle-orm"
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core"
+import { relations, sql } from "drizzle-orm";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-import { generateId } from "@/utils/uuid"
+import { generateId } from "@/utils/uuid";
 
 // ============================================================================
 // Auth tables (based on better-auth schema)
@@ -11,9 +11,7 @@ const users = sqliteTable("users", {
   id: text("id").primaryKey().$defaultFn(generateId),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: integer("email_verified", { mode: "boolean" })
-    .default(false)
-    .notNull(),
+  emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
   image: text("image"),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -22,7 +20,7 @@ const users = sqliteTable("users", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => new Date())
     .notNull(),
-})
+});
 
 const sessions = sqliteTable(
   "sessions",
@@ -43,7 +41,7 @@ const sessions = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [index("sessions_userId_idx").on(table.userId)],
-)
+);
 
 const accounts = sqliteTable(
   "accounts",
@@ -73,7 +71,7 @@ const accounts = sqliteTable(
       .notNull(),
   },
   (table) => [index("accounts_userId_idx").on(table.userId)],
-)
+);
 
 const verifications = sqliteTable(
   "verifications",
@@ -91,37 +89,37 @@ const verifications = sqliteTable(
       .notNull(),
   },
   (table) => [index("verifications_identifier_idx").on(table.identifier)],
-)
+);
 
 const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
-}))
+}));
 
 const sessionsRelations = relations(sessions, ({ one }) => ({
   users: one(users, {
     fields: [sessions.userId],
     references: [users.id],
   }),
-}))
+}));
 
 const accountsRelations = relations(accounts, ({ one }) => ({
   users: one(users, {
     fields: [accounts.userId],
     references: [users.id],
   }),
-}))
+}));
 
 // ============================================================================
 // App-specific tables
 // ============================================================================
 
-const contentTypeEnum = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const
-const statusEnum = ["processing", "completed", "failed"] as const
-const falEndpointIdEnum = ["fal-ai/qwen-image-layered"] as const
-const openaiEndpointIdEnum = ["openai/gpt-4o-mini"] as const
-const endpointIdEnum = [...falEndpointIdEnum, ...openaiEndpointIdEnum] as const
-const blobRoleEnum = ["input", "output"] as const
+const contentTypeEnum = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
+const statusEnum = ["processing", "completed", "failed"] as const;
+const falEndpointIdEnum = ["fal-ai/qwen-image-layered"] as const;
+const openaiEndpointIdEnum = ["openai/gpt-4o-mini"] as const;
+const endpointIdEnum = [...falEndpointIdEnum, ...openaiEndpointIdEnum] as const;
+const blobRoleEnum = ["input", "output"] as const;
 
 const projects = sqliteTable("projects", {
   id: text("id").primaryKey().$defaultFn(generateId),
@@ -134,7 +132,7 @@ const projects = sqliteTable("projects", {
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdate(() => new Date()),
-})
+});
 
 const predictions = sqliteTable("predictions", {
   id: text("id").primaryKey().$defaultFn(generateId),
@@ -153,7 +151,7 @@ const predictions = sqliteTable("predictions", {
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdate(() => new Date()),
-})
+});
 
 const blobs = sqliteTable("blobs", {
   id: text("id").primaryKey().$defaultFn(generateId),
@@ -169,7 +167,7 @@ const blobs = sqliteTable("blobs", {
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdate(() => new Date()),
-})
+});
 
 const predictionBlobs = sqliteTable("prediction_blobs", {
   id: text("id").primaryKey().$defaultFn(generateId),
@@ -188,21 +186,21 @@ const predictionBlobs = sqliteTable("prediction_blobs", {
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdate(() => new Date()),
-})
+});
 
 // Type exports
-type UserRow = typeof users.$inferSelect
-type NewUserRow = typeof users.$inferInsert
-type SessionRow = typeof sessions.$inferSelect
-type AccountRow = typeof accounts.$inferSelect
-type ProjectRow = typeof projects.$inferSelect
-type NewProjectRow = typeof projects.$inferInsert
-type PredictionRow = typeof predictions.$inferSelect
-type NewPredictionRow = typeof predictions.$inferInsert
-type BlobRow = typeof blobs.$inferSelect
-type NewBlobRow = typeof blobs.$inferInsert
-type PredictionBlobRow = typeof predictionBlobs.$inferSelect
-type NewPredictionBlobRow = typeof predictionBlobs.$inferInsert
+type UserRow = typeof users.$inferSelect;
+type NewUserRow = typeof users.$inferInsert;
+type SessionRow = typeof sessions.$inferSelect;
+type AccountRow = typeof accounts.$inferSelect;
+type ProjectRow = typeof projects.$inferSelect;
+type NewProjectRow = typeof projects.$inferInsert;
+type PredictionRow = typeof predictions.$inferSelect;
+type NewPredictionRow = typeof predictions.$inferInsert;
+type BlobRow = typeof blobs.$inferSelect;
+type NewBlobRow = typeof blobs.$inferInsert;
+type PredictionBlobRow = typeof predictionBlobs.$inferSelect;
+type NewPredictionBlobRow = typeof predictionBlobs.$inferInsert;
 
 export {
   users,
@@ -222,7 +220,7 @@ export {
   openaiEndpointIdEnum,
   endpointIdEnum,
   blobRoleEnum,
-}
+};
 
 export type {
   UserRow,
@@ -237,4 +235,4 @@ export type {
   NewBlobRow,
   PredictionBlobRow,
   NewPredictionBlobRow,
-}
+};

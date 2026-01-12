@@ -7,7 +7,7 @@
   "workers_dev": true,
   "preview_urls": true,
   "placement": {
-    "mode": "smart"
+    "mode": "smart",
   },
   "observability": {
     "enabled": true,
@@ -16,53 +16,53 @@
       "enabled": true,
       "head_sampling_rate": 1.0,
       "persist": true,
-      "invocation_logs": true
+      "invocation_logs": true,
     },
     "traces": {
       "enabled": false,
       "head_sampling_rate": 1.0,
-      "persist": true
-    }
+      "persist": true,
+    },
   },
   "routes": [
     {
       "pattern": "layered.so",
-      "custom_domain": true
-    }
+      "custom_domain": true,
+    },
   ],
   "vars": {
     "BETTER_AUTH_URL": "https://layered.so",
-    "R2_PUBLIC_URL": "https://layered.so/api/blobs"
+    "R2_PUBLIC_URL": "https://layered.so/api/blobs",
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "layered",
       "database_id": "56e7df3a-df01-4881-b00d-05ad0a9012ff",
-      "migrations_dir": "drizzle/migrations"
-    }
+      "migrations_dir": "drizzle/migrations",
+    },
   ],
   "ai": {
     "binding": "AI",
-    "remote": true
+    "remote": true,
   },
   "images": {
     "binding": "IMAGES",
-    "remote": true
+    "remote": true,
   },
   "r2_buckets": [
     {
       "binding": "BUCKET",
       "bucket_name": "layered",
       "preview_bucket_name": "layered-preview",
-      "remote": true
-    }
+      "remote": true,
+    },
   ],
   "workflows": [
     {
       "name": "upload-prediction-blobs-workflow",
       "binding": "UPLOAD_PREDICTION_BLOBS_WORKFLOW",
-      "class_name": "UploadPredictionBlobsWorkflow"
-    }
-  ]
+      "class_name": "UploadPredictionBlobsWorkflow",
+    },
+  ],
 }

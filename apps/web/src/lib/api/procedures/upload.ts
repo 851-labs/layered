@@ -1,11 +1,11 @@
-import { createServerFn } from "@tanstack/react-start"
-import { env } from "cloudflare:workers"
-import { z } from "zod"
+import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
+import { z } from "zod";
 
-import { db } from "../../db"
-import { blobs, contentTypeEnum } from "../../db/schema"
-import { generateId } from "../../../utils/uuid"
-import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware"
+import { generateId } from "../../../utils/uuid";
+import { db } from "../../db";
+import { blobs, contentTypeEnum } from "../../db/schema";
+import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware";
 
 // -----------------------------------------------------------------------------
 // Server Functions
@@ -21,31 +21,31 @@ const uploadImage = createServerFn({ method: "POST" })
       base64: z.string(),
       contentType: z.enum(contentTypeEnum),
       fileName: z.string(),
-    })
+    }),
   )
   .handler(async ({ data }) => {
-    const { base64, contentType, fileName } = data
+    const { base64, contentType, fileName } = data;
 
     // Convert base64 to blob
-    const binaryString = atob(base64)
-    const bytes = new Uint8Array(binaryString.length)
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
+      bytes[i] = binaryString.charCodeAt(i);
     }
-    const imageBlob = new Blob([bytes], { type: contentType })
+    const imageBlob = new Blob([bytes], { type: contentType });
 
     // Generate blob ID
-    const blobId = generateId()
+    const blobId = generateId();
 
     // Get image dimensions using Cloudflare Images binding
     // SVG returns { format: 'image/svg+xml' }, raster images include width/height
-    const info = await env.IMAGES.info(imageBlob.stream())
-    if (!("width" in info)) throw new Error("SVG images are not supported")
+    const info = await env.IMAGES.info(imageBlob.stream());
+    if (!("width" in info)) throw new Error("SVG images are not supported");
 
     // Upload to R2
     await env.BUCKET.put(blobId, imageBlob, {
       httpMetadata: { contentType },
-    })
+    });
 
     // Create blob record in database
     await db.insert(blobs).values({
@@ -55,12 +55,12 @@ const uploadImage = createServerFn({ method: "POST" })
       fileSize: imageBlob.size,
       width: info.width,
       height: info.height,
-    })
+    });
 
     // Return blob ID and public R2 URL
-    const url = `${env.R2_PUBLIC_URL}/${blobId}`
-    return { blobId, url }
-  })
+    const url = `${env.R2_PUBLIC_URL}/${blobId}`;
+    return { blobId, url };
+  });
 
 // -----------------------------------------------------------------------------
 // Router
@@ -68,6 +68,6 @@ const uploadImage = createServerFn({ method: "POST" })
 
 const uploadRouter = {
   image: uploadImage,
-}
+};
 
-export { uploadRouter }
+export { uploadRouter };
