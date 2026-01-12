@@ -60,7 +60,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
         const result = await api.project.create({
           data: { imageUrl: url, inputBlobId: blobId },
         });
-        navigate({ to: "/project/$id", params: { id: result.id } });
+        void navigate({ to: "/project/$id", params: { id: result.id } });
       } catch (err) {
         console.error("Upload failed:", err);
       } finally {

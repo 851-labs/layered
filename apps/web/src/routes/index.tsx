@@ -190,7 +190,7 @@ function App() {
         }
 
         // Navigate to the project page
-        navigate({ to: "/project/$id", params: { id: result.id } });
+        void navigate({ to: "/project/$id", params: { id: result.id } });
       } catch (err) {
         console.error("Processing failed:", err);
         setError(err instanceof Error ? err.message : "Failed to process image");
@@ -206,7 +206,7 @@ function App() {
     input.accept = "image/png,image/jpeg,image/webp,image/gif";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) handleImageSelected(file);
+      if (file) void handleImageSelected(file);
     };
     input.click();
   };
