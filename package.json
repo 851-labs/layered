@@ -4,9 +4,9 @@
   "workspaces": [
     "apps/*"
   ],
+  "type": "module",
   "scripts": {
-    "kill-ports": "(lsof -ti :3000 | xargs kill -9; lsof -ti :42069 | xargs kill -9; lsof -ti :9229 | xargs kill -9) 2>/dev/null || true",
-    "dev": "bun run kill-ports && cd apps/web && bun dev ",
+    "dev": "cd apps/web && bun dev",
     "format": "oxfmt --check",
     "format:fix": "oxfmt",
     "lint": "oxlint --type-aware --type-check",
@@ -21,6 +21,9 @@
     "db:migrations:apply:prod": "bun --filter=@layered/web db:migrations:apply:prod"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "lefthook": "^2.0.14",
     "oxfmt": "^0.23.0",
     "oxlint": "^1.38.0",
     "oxlint-tsgolint": "^0.11.0",
