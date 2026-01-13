@@ -105,7 +105,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
                   <img
                     src={project.inputBlob.url}
                     alt={project.name ?? `Project ${project.id.slice(0, 8)}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 )}
               </div>
