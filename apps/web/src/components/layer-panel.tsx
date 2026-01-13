@@ -1,5 +1,6 @@
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
+import { Button } from "@/ui/button";
 import { Separator } from "@/ui/separator";
 import { Slider } from "@/ui/slider";
 import { cn } from "@/utils/cn";
@@ -65,19 +66,18 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelP
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-0.5">
-                <button
-                  onClick={() => onToggleVisibility(index)}
-                  className="p-1.5 hover:bg-stone-200 rounded transition-colors"
-                  title={layer.visible ? "Hide layer" : "Show layer"}
-                >
-                  {layer.visible ? (
-                    <EyeIcon className="w-4 h-4 text-stone-500" />
-                  ) : (
-                    <EyeSlashIcon className="w-4 h-4 text-stone-400" />
-                  )}
-                </button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => onToggleVisibility(index)}
+                title={layer.visible ? "Hide layer" : "Show layer"}
+              >
+                {layer.visible ? (
+                  <EyeIcon className="text-stone-500" />
+                ) : (
+                  <EyeSlashIcon className="text-stone-400" />
+                )}
+              </Button>
             </div>
             <div className="pl-16">
               <Separator />
