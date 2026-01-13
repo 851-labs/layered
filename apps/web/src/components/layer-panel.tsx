@@ -1,8 +1,8 @@
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 import { Separator } from "@/ui/separator";
-
-import { cn } from "../utils/cn";
+import { Slider } from "@/ui/slider";
+import { cn } from "@/utils/cn";
 
 type Layer = {
   url: string;
@@ -43,7 +43,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelP
 
               {/* Layer info and controls */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center mb-3 justify-between">
                   <span className="text-xs font-medium text-stone-700">Layer {index + 1}</span>
                   <span className="text-[10px] text-stone-400 tabular-nums">
                     {Math.round(layer.opacity * 100)}%
@@ -51,19 +51,16 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelP
                 </div>
 
                 {/* Opacity slider */}
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={layer.opacity * 100}
-                  onChange={(e) => onOpacityChange(index, parseInt(e.target.value) / 100)}
+                <Slider
+                  min={0}
+                  max={100}
+                  value={[layer.opacity * 100]}
+                  onValueChange={(value) => {
+                    const opacity = Array.isArray(value) ? value[0] : value;
+                    onOpacityChange(index, opacity / 100);
+                  }}
                   disabled={!layer.visible}
-                  className={cn(
-                    "w-full h-1 rounded-full appearance-none cursor-pointer bg-stone-200 mt-1.5",
-                    "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5",
-                    "[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-800 [&::-webkit-slider-thumb]:cursor-pointer",
-                    "disabled:opacity-50 disabled:cursor-not-allowed",
-                  )}
+                  className="mt-1.5"
                 />
               </div>
 
