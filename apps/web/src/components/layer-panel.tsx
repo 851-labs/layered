@@ -1,4 +1,4 @@
-import { CrosshairIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
+import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 import { Separator } from "@/ui/separator";
 
@@ -14,10 +14,9 @@ type LayerPanelProps = {
   layers: Layer[];
   onToggleVisibility: (index: number) => void;
   onOpacityChange: (index: number, opacity: number) => void;
-  onSolo: (index: number) => void;
 };
 
-function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: LayerPanelProps) {
+function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelProps) {
   return (
     <div className="w-72 border-l border-stone-200 bg-stone-50 flex flex-col h-full">
       {/* Header */}
@@ -70,13 +69,6 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
 
               {/* Actions */}
               <div className="flex items-center gap-0.5">
-                <button
-                  onClick={() => onSolo(index)}
-                  className="p-1.5 hover:bg-stone-200 rounded transition-colors"
-                  title="Solo layer"
-                >
-                  <CrosshairIcon className="w-4 h-4 text-stone-400" />
-                </button>
                 <button
                   onClick={() => onToggleVisibility(index)}
                   className="p-1.5 hover:bg-stone-200 rounded transition-colors"

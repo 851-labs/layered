@@ -34,16 +34,6 @@ function ProjectPage() {
     setLayers((prev) => prev.map((layer, i) => (i === index ? { ...layer, opacity } : layer)));
   }, []);
 
-  const handleSolo = useCallback((index: number) => {
-    setLayers((prev) =>
-      prev.map((layer, i) => ({
-        ...layer,
-        visible: i === index,
-        opacity: i === index ? 1 : layer.opacity,
-      })),
-    );
-  }, []);
-
   return (
     <div className="h-[calc(100vh-56px)] flex bg-stone-50">
       {/* Left sidebar: History */}
@@ -59,7 +49,6 @@ function ProjectPage() {
         layers={layers}
         onToggleVisibility={handleToggleVisibility}
         onOpacityChange={handleOpacityChange}
-        onSolo={handleSolo}
       />
     </div>
   );
