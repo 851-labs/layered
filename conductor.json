@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "setup": "bun ci; cp $CONDUCTOR_ROOT_PATH/apps/web/.env apps/web/.env",
+    "setup": "bun ci; cp $CONDUCTOR_ROOT_PATH/apps/web/.env apps/web/.env; bun db:migrations:apply",
     "run": "bun dev"
   },
   "runScriptMode": "nonconcurrent"
