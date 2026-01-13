@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "setup": "bun ci; cp $CONDUCTOR_ROOT_PATH/apps/web/.env apps/web/.env",
+    "run": "bun dev"
+  },
+  "runScriptMode": "nonconcurrent"
+}
