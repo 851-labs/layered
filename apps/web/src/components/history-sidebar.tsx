@@ -110,11 +110,11 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
                     />
                   )}
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium text-stone-600 truncate">
                     {project.name ?? project.id.slice(0, 8)}
                   </span>
-                  <span className="text-xs text-stone-400">
+                  <span className="text-xs text-stone-400 shrink-0 whitespace-nowrap">
                     {project.outputBlobs.length} layers
                   </span>
                 </div>
