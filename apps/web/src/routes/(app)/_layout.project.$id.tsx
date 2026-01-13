@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 
-import { HistorySidebar } from "../components/history-sidebar";
-import { LayerPanel } from "../components/layer-panel";
-import { LayerViewer3D } from "../components/layer-viewer-3d";
-import { api } from "../lib/api";
-import { type Blob } from "../lib/api/schema";
+import { HistorySidebar } from "../../components/history-sidebar";
+import { LayerPanel } from "../../components/layer-panel";
+import { LayerViewer3D } from "../../components/layer-viewer-3d";
+import { api } from "../../lib/api";
+import { type Blob } from "../../lib/api/schema";
 
 type LayerState = {
   url: string;
@@ -54,7 +54,7 @@ function ProjectPage() {
   );
 }
 
-const Route = createFileRoute("/project/$id")({
+const Route = createFileRoute("/(app)/_layout/project/$id")({
   loader: async ({ params }) => {
     const [project, { projects }] = await Promise.all([
       api.project.get({ data: { id: params.id } }),

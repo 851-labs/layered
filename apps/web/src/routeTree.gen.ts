@@ -9,20 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProjectIdRouteImport } from './routes/project.$id'
+import { Route as marketingLayoutRouteImport } from './routes/(marketing)/_layout'
+import { Route as appLayoutRouteImport } from './routes/(app)/_layout'
+import { Route as marketingLayoutIndexRouteImport } from './routes/(marketing)/_layout.index'
 import { Route as ApiBlobsSplatRouteImport } from './routes/api/blobs/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as appLayoutProjectIdRouteImport } from './routes/(app)/_layout.project.$id'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const marketingLayoutRoute = marketingLayoutRouteImport.update({
+  id: '/(marketing)/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectIdRoute = ProjectIdRouteImport.update({
-  id: '/project/$id',
-  path: '/project/$id',
+const appLayoutRoute = appLayoutRouteImport.update({
+  id: '/(app)/_layout',
   getParentRoute: () => rootRouteImport,
+} as any)
+const marketingLayoutIndexRoute = marketingLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => marketingLayoutRoute,
 } as any)
 const ApiBlobsSplatRoute = ApiBlobsSplatRouteImport.update({
   id: '/api/blobs/$',
@@ -34,56 +39,77 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appLayoutProjectIdRoute = appLayoutProjectIdRouteImport.update({
+  id: '/project/$id',
+  path: '/project/$id',
+  getParentRoute: () => appLayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/project/$id': typeof ProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/blobs/$': typeof ApiBlobsSplatRoute
+  '/': typeof marketingLayoutIndexRoute
+  '/project/$id': typeof appLayoutProjectIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/project/$id': typeof ProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/blobs/$': typeof ApiBlobsSplatRoute
+  '/': typeof marketingLayoutIndexRoute
+  '/project/$id': typeof appLayoutProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/project/$id': typeof ProjectIdRoute
+  '/(app)/_layout': typeof appLayoutRouteWithChildren
+  '/(marketing)/_layout': typeof marketingLayoutRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/blobs/$': typeof ApiBlobsSplatRoute
+  '/(marketing)/_layout/': typeof marketingLayoutIndexRoute
+  '/(app)/_layout/project/$id': typeof appLayoutProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/project/$id' | '/api/auth/$' | '/api/blobs/$'
+  fullPaths: '/api/auth/$' | '/api/blobs/$' | '/' | '/project/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/project/$id' | '/api/auth/$' | '/api/blobs/$'
-  id: '__root__' | '/' | '/project/$id' | '/api/auth/$' | '/api/blobs/$'
+  to: '/api/auth/$' | '/api/blobs/$' | '/' | '/project/$id'
+  id:
+    | '__root__'
+    | '/(app)/_layout'
+    | '/(marketing)/_layout'
+    | '/api/auth/$'
+    | '/api/blobs/$'
+    | '/(marketing)/_layout/'
+    | '/(app)/_layout/project/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ProjectIdRoute: typeof ProjectIdRoute
+  appLayoutRoute: typeof appLayoutRouteWithChildren
+  marketingLayoutRoute: typeof marketingLayoutRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBlobsSplatRoute: typeof ApiBlobsSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/(marketing)/_layout': {
+      id: '/(marketing)/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof marketingLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/project/$id': {
-      id: '/project/$id'
-      path: '/project/$id'
-      fullPath: '/project/$id'
-      preLoaderRoute: typeof ProjectIdRouteImport
+    '/(app)/_layout': {
+      id: '/(app)/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof appLayoutRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(marketing)/_layout/': {
+      id: '/(marketing)/_layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof marketingLayoutIndexRouteImport
+      parentRoute: typeof marketingLayoutRoute
     }
     '/api/blobs/$': {
       id: '/api/blobs/$'
@@ -99,12 +125,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/_layout/project/$id': {
+      id: '/(app)/_layout/project/$id'
+      path: '/project/$id'
+      fullPath: '/project/$id'
+      preLoaderRoute: typeof appLayoutProjectIdRouteImport
+      parentRoute: typeof appLayoutRoute
+    }
   }
 }
 
+interface appLayoutRouteChildren {
+  appLayoutProjectIdRoute: typeof appLayoutProjectIdRoute
+}
+
+const appLayoutRouteChildren: appLayoutRouteChildren = {
+  appLayoutProjectIdRoute: appLayoutProjectIdRoute,
+}
+
+const appLayoutRouteWithChildren = appLayoutRoute._addFileChildren(
+  appLayoutRouteChildren,
+)
+
+interface marketingLayoutRouteChildren {
+  marketingLayoutIndexRoute: typeof marketingLayoutIndexRoute
+}
+
+const marketingLayoutRouteChildren: marketingLayoutRouteChildren = {
+  marketingLayoutIndexRoute: marketingLayoutIndexRoute,
+}
+
+const marketingLayoutRouteWithChildren = marketingLayoutRoute._addFileChildren(
+  marketingLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ProjectIdRoute: ProjectIdRoute,
+  appLayoutRoute: appLayoutRouteWithChildren,
+  marketingLayoutRoute: marketingLayoutRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBlobsSplatRoute: ApiBlobsSplatRoute,
 }

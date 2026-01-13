@@ -1,8 +1,7 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import { configure } from "onedollarstats";
 import { useEffect } from "react";
 
-import { Header } from "../components/header";
 import appCss from "../styles.css?url";
 
 const Route = createRootRoute({
@@ -31,8 +30,8 @@ const Route = createRootRoute({
       },
     ],
   }),
-
   shellComponent: RootDocument,
+  component: RootComponent,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -46,12 +45,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
         {children}
         <Scripts />
       </body>
     </html>
   );
+}
+
+function RootComponent() {
+  return <Outlet />;
 }
 
 export { Route };

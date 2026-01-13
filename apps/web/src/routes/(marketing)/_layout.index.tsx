@@ -2,9 +2,9 @@ import { CircleNotchIcon, UploadSimpleIcon, WarningCircleIcon } from "@phosphor-
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 
-import { api } from "../lib/api";
-import { authClient } from "../lib/auth/client";
-import { cn } from "../utils/cn";
+import { api } from "../../lib/api";
+import { authClient } from "../../lib/auth/client";
+import { cn } from "../../utils/cn";
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
 type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number];
@@ -137,7 +137,7 @@ const EXAMPLES = [
   },
 ];
 
-function App() {
+function LandingPage() {
   const navigate = useNavigate();
   const { data: session } = authClient.useSession();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -234,7 +234,7 @@ function App() {
             >
               <div
                 className={cn(
-                  "w-16 h-16 rounded-2xl border-2 border-dashed flex items-center justify-center transition-colors",
+                  "w-16 h-16 border-2 border-dashed flex items-center justify-center transition-colors",
                   isProcessing
                     ? "border-stone-300 bg-stone-100"
                     : "border-stone-300 group-hover:border-stone-400 group-hover:bg-stone-100",
@@ -255,7 +255,7 @@ function App() {
             </button>
 
             {error && (
-              <div className="mt-8 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl max-w-md">
+              <div className="mt-8 flex items-start gap-3 p-4 bg-red-50 border border-red-200 max-w-md">
                 <WarningCircleIcon className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                 <p className="text-sm text-red-700">{error}</p>
               </div>
@@ -274,6 +274,8 @@ function App() {
   );
 }
 
-const Route = createFileRoute("/")({ component: App });
+const Route = createFileRoute("/(marketing)/_layout/")({
+  component: LandingPage,
+});
 
 export { Route };

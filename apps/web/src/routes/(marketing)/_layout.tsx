@@ -1,15 +1,14 @@
 import { GithubLogoIcon } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
-import { authClient } from "../lib/auth/client";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { authClient } from "../../lib/auth/client";
 
-function Header() {
+function MarketingHeader() {
   const { data: session } = authClient.useSession();
 
   return (
     <header className="h-14 border-b border-stone-200/60 bg-stone-50/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="h-full max-w-[1400px] mx-auto px-6 flex items-center justify-between">
+      <div className="h-full max-w-4xl mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="text-[15px] font-medium text-stone-800 tracking-tight">Layered</span>
         </Link>
@@ -26,10 +25,13 @@ function Header() {
           </a>
 
           {session?.user ? (
-            <Avatar>
-              <AvatarImage src={session.user.image ?? ""} alt={session.user.name ?? ""} />
-              <AvatarFallback>{session.user.name?.charAt(0) ?? "U"}</AvatarFallback>
-            </Avatar>
+            <Link
+              to="/project/$id"
+              params={{ id: "latest" }}
+              className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
+            >
+              Dashboard
+            </Link>
           ) : (
             <button
               onClick={() => authClient.signIn.social({ provider: "google" })}
@@ -44,4 +46,17 @@ function Header() {
   );
 }
 
-export { Header };
+function MarketingLayout() {
+  return (
+    <>
+      <MarketingHeader />
+      <Outlet />
+    </>
+  );
+}
+
+const Route = createFileRoute("/(marketing)/_layout")({
+  component: MarketingLayout,
+});
+
+export { Route };
