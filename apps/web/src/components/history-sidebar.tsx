@@ -1,9 +1,10 @@
+import { CircleNotchIcon, PlusIcon } from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Plus, Loader2 } from "lucide-react";
 import { useState, useCallback } from "react";
 
 import { api } from "../lib/api";
 import { type Project } from "../lib/api/schema";
+import { Button } from "../ui/button";
 import { cn } from "../utils/cn";
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
@@ -74,18 +75,14 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
     <div className="w-60 border-r border-stone-200 bg-stone-50 flex flex-col h-full">
       {/* Header with New button */}
       <div className="p-3 border-b border-stone-200">
-        <button
-          onClick={handleNewClick}
-          disabled={isUploading}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-400 text-white text-sm font-medium rounded-lg transition-colors"
-        >
+        <Button onClick={handleNewClick} disabled={isUploading} className="w-full">
           {isUploading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <CircleNotchIcon className="animate-spin" data-icon="inline-start" />
           ) : (
-            <Plus className="w-4 h-4" />
+            <PlusIcon data-icon="inline-start" />
           )}
-          <span>{isUploading ? "Processing..." : "New"}</span>
-        </button>
+          {isUploading ? "Processing..." : "New"}
+        </Button>
       </div>
 
       {/* Projects list */}

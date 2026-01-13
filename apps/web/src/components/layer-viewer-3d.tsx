@@ -1,4 +1,4 @@
-import { RotateCcw, Move } from "lucide-react";
+import { ArrowCounterClockwiseIcon, ArrowsOutCardinalIcon } from "@phosphor-icons/react";
 import { useState, useRef, useEffect } from "react";
 
 import { cn } from "../utils/cn";
@@ -71,13 +71,13 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
           className="p-2.5 bg-white/90 hover:bg-white rounded-lg transition-colors shadow-sm border border-stone-200/60"
           title="Reset view"
         >
-          <RotateCcw className="w-4 h-4 text-stone-600" />
+          <ArrowCounterClockwiseIcon className="w-4 h-4 text-stone-600" />
         </button>
       </div>
 
       {/* Drag hint */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 rounded-full shadow-sm border border-stone-200/60">
-        <Move className="w-3 h-3 text-stone-400" />
+        <ArrowsOutCardinalIcon className="w-3 h-3 text-stone-400" />
         <span className="text-xs text-stone-500">Drag to rotate</span>
       </div>
 

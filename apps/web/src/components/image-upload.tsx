@@ -1,4 +1,4 @@
-import { Upload, Image as ImageIcon, Loader2 } from "lucide-react";
+import { CircleNotchIcon, ImageIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { useState, useCallback } from "react";
 
 import { cn } from "../utils/cn";
@@ -100,7 +100,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
             {isUploading && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="w-10 h-10 text-amber-400 animate-spin" />
+                  <CircleNotchIcon className="w-10 h-10 text-amber-400 animate-spin" />
                   <span className="text-zinc-300 text-sm font-medium">Processing layers...</span>
                 </div>
               </div>
@@ -117,7 +117,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
               {isDragOver ? (
                 <ImageIcon className="w-10 h-10 text-amber-400" />
               ) : (
-                <Upload className="w-10 h-10 text-zinc-400" />
+                <UploadSimpleIcon className="w-10 h-10 text-zinc-400" />
               )}
             </div>
             <div className="text-center">

@@ -1,5 +1,5 @@
+import { CircleNotchIcon, UploadSimpleIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Upload, Loader2, AlertCircle } from "lucide-react";
 import { useState, useCallback } from "react";
 
 import { api } from "../lib/api";
@@ -241,9 +241,9 @@ function App() {
                 )}
               >
                 {isProcessing ? (
-                  <Loader2 className="w-6 h-6 text-stone-400 animate-spin" />
+                  <CircleNotchIcon className="w-6 h-6 text-stone-400 animate-spin" />
                 ) : (
-                  <Upload className="w-6 h-6 text-stone-400 group-hover:text-stone-500" />
+                  <UploadSimpleIcon className="w-6 h-6 text-stone-400 group-hover:text-stone-500" />
                 )}
               </div>
               <div className="text-center">
@@ -256,7 +256,7 @@ function App() {
 
             {error && (
               <div className="mt-8 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl max-w-md">
-                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <WarningCircleIcon className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}

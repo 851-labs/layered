@@ -1,7 +1,8 @@
+import { GithubLogoIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { Github } from "lucide-react";
 
 import { authClient } from "../lib/auth/client";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 function Header() {
   const { data: session } = authClient.useSession();
@@ -21,15 +22,14 @@ function Header() {
             className="p-2 -m-2 text-stone-500 hover:text-stone-900 transition-colors"
             aria-label="GitHub"
           >
-            <Github className="w-5 h-5" />
+            <GithubLogoIcon className="w-5 h-5" />
           </a>
 
           {session?.user ? (
-            <img
-              src={session.user.image ?? ""}
-              alt={session.user.name ?? ""}
-              className="w-8 h-8 rounded-full"
-            />
+            <Avatar>
+              <AvatarImage src={session.user.image ?? ""} alt={session.user.name ?? ""} />
+              <AvatarFallback>{session.user.name?.charAt(0) ?? "U"}</AvatarFallback>
+            </Avatar>
           ) : (
             <button
               onClick={() => authClient.signIn.social({ provider: "google" })}

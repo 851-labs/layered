@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Focus } from "lucide-react";
+import { CrosshairIcon, EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 import { cn } from "../utils/cn";
 
@@ -78,7 +78,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
                     className="p-1 hover:bg-stone-100 rounded transition-colors"
                     title="Solo layer"
                   >
-                    <Focus className="w-3.5 h-3.5 text-stone-400 hover:text-stone-700" />
+                    <CrosshairIcon className="w-3.5 h-3.5 text-stone-400 hover:text-stone-700" />
                   </button>
                   <button
                     onClick={() => onToggleVisibility(index)}
@@ -86,9 +86,9 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange, onSolo }: Lay
                     title={layer.visible ? "Hide layer" : "Show layer"}
                   >
                     {layer.visible ? (
-                      <Eye className="w-3.5 h-3.5 text-stone-500" />
+                      <EyeIcon className="w-3.5 h-3.5 text-stone-500" />
                     ) : (
-                      <EyeOff className="w-3.5 h-3.5 text-stone-400" />
+                      <EyeSlashIcon className="w-3.5 h-3.5 text-stone-400" />
                     )}
                   </button>
                 </div>
