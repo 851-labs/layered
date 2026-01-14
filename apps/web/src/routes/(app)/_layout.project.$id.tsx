@@ -1,10 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
+import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+import { useCallback, useState } from "react";
 
 import { api } from "../../lib/api";
 import { type Blob } from "../../lib/api/schema";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../../ui/resizable";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../../ui/resizable";
 import { HistorySidebar } from "./-components/history-sidebar";
 import { LayerPanel } from "./-components/layer-panel";
 import { LayerViewer3D } from "./-components/layer-viewer-3d";
@@ -39,35 +39,36 @@ function ProjectPage() {
   }, []);
 
   return (
-    <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)]!">
-      {/* Left sidebar: History */}
-      <ResizablePanel minSize={200} defaultSize={240} maxSize={300}>
-        <HistorySidebar projects={projectsData.projects} currentId={project.id} />
-      </ResizablePanel>
+    <ClientOnly>
+      <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)]!">
+        {/* Left sidebar: History */}
+        <ResizablePanel minSize={200} defaultSize={240} maxSize={300}>
+          <HistorySidebar projects={projectsData.projects} currentId={project.id} />
+        </ResizablePanel>
 
-      <ResizableHandle />
+        <ResizableHandle />
 
-      {/* Center: 3D Viewer */}
-      <ResizablePanel>
-        <LayerViewer3D layers={layers} />
-      </ResizablePanel>
+        {/* Center: 3D Viewer */}
+        <ResizablePanel>
+          <LayerViewer3D layers={layers} />
+        </ResizablePanel>
 
-      <ResizableHandle />
+        <ResizableHandle />
 
-      {/* Right sidebar: Layers */}
-      <ResizablePanel minSize={200} defaultSize={288} maxSize={300}>
-        <LayerPanel
-          layers={layers}
-          onToggleVisibility={handleToggleVisibility}
-          onOpacityChange={handleOpacityChange}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+        {/* Right sidebar: Layers */}
+        <ResizablePanel minSize={200} defaultSize={288} maxSize={300}>
+          <LayerPanel
+            layers={layers}
+            onToggleVisibility={handleToggleVisibility}
+            onOpacityChange={handleOpacityChange}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </ClientOnly>
   );
 }
 
 const Route = createFileRoute("/(app)/_layout/project/$id")({
-  ssr: false,
   loader: async ({ params, context: { queryClient } }) => {
     await Promise.all([
       queryClient.ensureQueryData(api.project.get.queryOptions({ id: params.id })),
