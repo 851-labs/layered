@@ -7,7 +7,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useLayoutEffect } from "react";
 
 import { api } from "@/lib/api";
 import { type Project } from "@/lib/api/schema";
@@ -22,6 +22,9 @@ import { cn } from "@/utils/cn";
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
 type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number];
+
+// Module-level variable to persist scroll position across route changes
+let persistedScrollTop = 0;
 
 const MIN_LAYERS = 2;
 const MAX_LAYERS = 8;
@@ -44,6 +47,24 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [layerCount, setLayerCount] = useState(DEFAULT_LAYERS);
   const [error, setError] = useState<string | null>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+
+  // Restore scroll position on mount and save on scroll
+  useLayoutEffect(() => {
+    const viewport = scrollViewportRef.current;
+    if (!viewport) return;
+
+    // Restore scroll position
+    viewport.scrollTop = persistedScrollTop;
+
+    // Save scroll position on scroll
+    const handleScroll = () => {
+      persistedScrollTop = viewport.scrollTop;
+    };
+
+    viewport.addEventListener("scroll", handleScroll, { passive: true });
+    return () => viewport.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleImageSelect = useCallback(() => {
     if (isGenerating) return;
@@ -225,7 +246,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
       <Separator />
 
       {/* Projects list */}
-      <ScrollArea className="flex-1 min-h-0">
+      <ScrollArea className="flex-1 min-h-0" viewportRef={scrollViewportRef}>
         {projects.map((project) => {
           const isActive = project.id === currentId;
 
