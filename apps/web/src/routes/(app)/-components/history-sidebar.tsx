@@ -183,11 +183,15 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
               )}
             </>
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-              <ImageIcon className="w-6 h-6 text-stone-400" />
-              <span className="text-xs text-stone-500">
-                {isDragActive ? "Drop image here" : "Drop image or click to upload"}
-              </span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <ImageIcon className="w-8 h-8 text-stone-300" />
+              <p className="text-xs text-stone-500 text-center">
+                <span>
+                  Drop image here
+                  <br />
+                  or click to browse
+                </span>
+              </p>
             </div>
           )}
         </div>
