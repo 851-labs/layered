@@ -1,11 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { createQueryProcedure } from "../create-procedure";
-import { throwIfUnauthenticatedMiddleware } from "../middleware";
+import { optionalAuthMiddleware } from "../middleware";
 
 const getFn = createServerFn({ method: "GET" })
-  .middleware([throwIfUnauthenticatedMiddleware])
+  .middleware([optionalAuthMiddleware])
   .handler(async ({ context }) => {
+    if (!context.session?.user) return null;
     const { user } = context.session;
     return {
       id: user.id,

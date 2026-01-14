@@ -41,6 +41,15 @@ const throwIfUnauthenticatedMiddleware = createMiddleware().server(async ({ next
 });
 
 /**
+ * For server functions - attaches session if authenticated, null otherwise
+ */
+const optionalAuthMiddleware = createMiddleware().server(async ({ next }) => {
+  const headers = getRequestHeaders();
+  const session = await auth.api.getSession({ headers });
+  return await next({ context: { session } });
+});
+
+/**
  * Server function to check auth and redirect - for use in route beforeLoad
  */
 const requireAuth = createServerFn({ method: "GET" })
@@ -52,6 +61,7 @@ const requireAuth = createServerFn({ method: "GET" })
 
 export {
   errorHandlingMiddleware,
+  optionalAuthMiddleware,
   redirectIfUnauthenticatedMiddleware,
   throwIfUnauthenticatedMiddleware,
   requireAuth,

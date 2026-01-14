@@ -1,5 +1,5 @@
 import { SignOutIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 
 import { api } from "../../lib/api";
@@ -16,7 +16,7 @@ import { Separator } from "../../ui/separator";
 
 function AppHeader() {
   const router = useRouter();
-  const { data: user } = useQuery(api.account.get.queryOptions());
+  const { data: user } = useSuspenseQuery(api.account.get.queryOptions());
 
   return (
     <header className="h-12 bg-white sticky top-0 z-50 flex flex-col">
@@ -70,6 +70,9 @@ function AppLayout() {
 }
 
 const Route = createFileRoute("/(app)/_layout")({
+  loader: async ({ context: { queryClient } }) => {
+    await queryClient.ensureQueryData(api.account.get.queryOptions());
+  },
   component: AppLayout,
 });
 
