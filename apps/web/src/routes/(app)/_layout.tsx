@@ -2,6 +2,7 @@ import { SignOutIcon } from "@phosphor-icons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 
+import { useZoomLock } from "../../hooks/use-zoom-lock";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
@@ -13,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { Separator } from "../../ui/separator";
-import { useZoomLock } from "../../utils/use-zoom-lock";
 
 function AppHeader() {
   const router = useRouter();
