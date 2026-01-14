@@ -1,6 +1,7 @@
 import { ArrowCounterClockwiseIcon, ArrowsOutCardinalIcon } from "@phosphor-icons/react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
+import { Slider } from "../ui/slider";
 import { cn } from "../utils/cn";
 
 type Layer = {
@@ -11,15 +12,28 @@ type Layer = {
 
 type LayerViewer3DProps = {
   layers: Layer[];
-  className?: string;
 };
 
-function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
+const DEFAULT_ROTATION = { x: 15, y: -25 };
+const DEFAULT_ZOOM = 1;
+const DEFAULT_SPACING = 50;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2.5;
+const SPACING_MIN = 0;
+const SPACING_MAX = 100;
+
+function LayerViewer3D({ layers }: LayerViewer3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [rotation, setRotation] = useState({ x: 15, y: -25 });
+  const [rotation, setRotation] = useState(DEFAULT_ROTATION);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [spread, setSpread] = useState(0);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [spacing, setSpacing] = useState(DEFAULT_SPACING);
+
+  // Touch state for pinch-to-zoom
+  const [initialPinchDistance, setInitialPinchDistance] = useState<number | null>(null);
+  const [initialZoom, setInitialZoom] = useState(DEFAULT_ZOOM);
 
   // Animate spread on mount and when layers change
   useEffect(() => {
@@ -55,30 +69,122 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
     setIsDragging(false);
   };
 
-  const resetRotation = () => {
-    setRotation({ x: 15, y: -25 });
+  // Scroll wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom((prev) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, prev + delta)));
+  }, []);
+
+  // Calculate distance between two touch points
+  const getTouchDistance = (touches: React.TouchList): number => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Touch handlers for pinch-to-zoom
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const distance = getTouchDistance(e.touches);
+      setInitialPinchDistance(distance);
+      setInitialZoom(zoom);
+    } else if (e.touches.length === 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialPinchDistance !== null) {
+      e.preventDefault();
+      const currentDistance = getTouchDistance(e.touches);
+      const scale = currentDistance / initialPinchDistance;
+      const newZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, initialZoom * scale));
+      setZoom(newZoom);
+    } else if (e.touches.length === 1 && isDragging) {
+      const deltaX = e.touches[0].clientX - dragStart.x;
+      const deltaY = e.touches[0].clientY - dragStart.y;
+
+      setRotation((prev) => ({
+        x: Math.max(-60, Math.min(60, prev.x - deltaY * 0.3)),
+        y: prev.y + deltaX * 0.3,
+      }));
+
+      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setInitialPinchDistance(null);
+    setIsDragging(false);
+  };
+
+  const resetView = () => {
+    setRotation(DEFAULT_ROTATION);
+    setZoom(DEFAULT_ZOOM);
+    setSpacing(DEFAULT_SPACING);
+  };
+
+  const handleSpacingChange = (value: number | readonly number[]) => {
+    const newValue = Array.isArray(value) ? value[0] : value;
+    setSpacing(newValue);
   };
 
   const visibleLayers = layers.filter((l) => l.visible);
-  const layerSpacing = 50 * spread;
+  const layerSpacing = spacing * spread;
 
   return (
-    <div className={cn("relative", className)}>
+    <div className="w-full h-full relative bg-gray-50">
+      {/* Live Coordinates Overlay */}
+      <div className="absolute top-4 left-4 z-10 bg-white/90 border border-stone-200/60 px-3 py-2 font-mono text-xs text-stone-600 space-y-1">
+        <div className="flex justify-between gap-4">
+          <span className="text-stone-400">Rotate X</span>
+          <span>{rotation.x.toFixed(1)}°</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-stone-400">Rotate Y</span>
+          <span>{rotation.y.toFixed(1)}°</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-stone-400">Zoom</span>
+          <span>{(zoom * 100).toFixed(0)}%</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-stone-400">Spacing</span>
+          <span>{spacing.toFixed(0)}px</span>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <button
-          onClick={resetRotation}
-          className="p-2.5 bg-white/90 hover:bg-white transition-colors shadow-sm border border-stone-200/60"
+          onClick={resetView}
+          className="p-2.5 bg-white/90 hover:bg-white transition-colors border border-stone-200/60"
           title="Reset view"
         >
           <ArrowCounterClockwiseIcon className="w-4 h-4 text-stone-600" />
         </button>
       </div>
 
-      {/* Drag hint */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 shadow-sm border border-stone-200/60">
-        <ArrowsOutCardinalIcon className="w-3 h-3 text-stone-400" />
-        <span className="text-xs text-stone-500">Drag to rotate</span>
+      {/* Bottom Control Bar */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-4 px-4 py-2 bg-white/90 border border-stone-200/60">
+        <div className="flex items-center gap-2">
+          <ArrowsOutCardinalIcon className="w-3 h-3 text-stone-400" />
+          <span className="text-xs text-stone-500">Drag to rotate</span>
+        </div>
+        <div className="w-px h-4 bg-stone-200" />
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-stone-500 whitespace-nowrap">Spacing</span>
+          <Slider
+            className="w-24"
+            value={[spacing]}
+            min={SPACING_MIN}
+            max={SPACING_MAX}
+            onValueChange={handleSpacingChange}
+          />
+        </div>
       </div>
 
       {/* 3D Scene */}
@@ -88,6 +194,10 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         className={cn(
           "w-full h-full min-h-[300px] flex items-center justify-center cursor-grab select-none",
           isDragging && "cursor-grabbing",
@@ -98,7 +208,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
           className="relative transition-transform duration-300 ease-out"
           style={{
             transformStyle: "preserve-3d",
-            transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+            transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${zoom})`,
           }}
         >
           {visibleLayers.map((layer, index) => {

@@ -18,7 +18,7 @@ function AppHeader() {
 
   return (
     <header className="h-12 bg-white sticky top-0 z-50 flex flex-col">
-      <div className="flex-1 max-w-[1400px] w-full mx-auto px-6 flex items-center justify-between">
+      <div className="flex-1 w-full mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="text-sm font-medium text-stone-800 tracking-tight">Layered</span>
         </Link>

@@ -19,7 +19,7 @@ type LayerPanelProps = {
 
 function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelProps) {
   return (
-    <div className="w-72 border-l border-stone-200 bg-white flex flex-col h-full">
+    <div className="bg-white flex flex-col h-full">
       {/* Header */}
       <div className="px-4 py-3">
         <h2 className="text-xs font-medium text-stone-700">Layers</h2>

@@ -105,7 +105,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
   }, [selectedFile, layerCount, navigate, isGenerating]);
 
   return (
-    <div className="w-60 border-r border-stone-200 bg-white flex flex-col h-full">
+    <div className="bg-white flex flex-col h-full">
       {/* New Project Form */}
       <div className="p-3 space-y-3">
         {/* Image Selector */}
