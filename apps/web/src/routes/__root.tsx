@@ -40,7 +40,7 @@ const Route = createRootRouteWithContext<{
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    configure({ trackLocalhostAs: "layered.test" });
+    configure();
   }, []);
 
   return (
