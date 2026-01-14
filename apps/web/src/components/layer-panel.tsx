@@ -19,10 +19,10 @@ type LayerPanelProps = {
 
 function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelProps) {
   return (
-    <div className="w-72 border-l border-stone-200 bg-stone-50 flex flex-col h-full">
+    <div className="w-72 border-l border-stone-200 bg-white flex flex-col h-full">
       {/* Header */}
       <div className="px-4 py-3">
-        <h2 className="text-sm font-medium text-stone-700">Layers</h2>
+        <h2 className="text-xs font-medium text-stone-700">Layers</h2>
       </div>
       <Separator />
 
@@ -34,7 +34,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelP
               className={cn("px-3 py-2 flex items-center gap-3", !layer.visible && "opacity-50")}
             >
               {/* Thumbnail */}
-              <div className="w-10 h-10 rounded overflow-hidden shrink-0 checkerboard">
+              <div className="w-10 h-10 overflow-hidden shrink-0 checkerboard">
                 <img
                   src={layer.url}
                   alt={`Layer ${index + 1}`}

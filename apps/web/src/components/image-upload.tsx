@@ -87,7 +87,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
         onDragLeave={handleDragLeave}
         onClick={handleClick}
         className={cn(
-          "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer",
+          "relative overflow-hidden border-2 border-dashed transition-all duration-300 cursor-pointer",
           isDragOver
             ? "border-amber-400 bg-amber-400/10 scale-[1.02]"
             : "border-zinc-600 hover:border-zinc-500 bg-zinc-900/50",
@@ -110,7 +110,7 @@ function ImageUpload({ onImageSelected, isUploading = false, disabled = false }:
           <div className="p-12 flex flex-col items-center gap-4">
             <div
               className={cn(
-                "p-4 rounded-full transition-colors",
+                "p-4 transition-colors",
                 isDragOver ? "bg-amber-400/20" : "bg-zinc-800",
               )}
             >

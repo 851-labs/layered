@@ -106,9 +106,15 @@ function getOutputBlobs(prediction: {
  */
 const createProject = createServerFn({ method: "POST" })
   .middleware([errorHandlingMiddleware, throwIfUnauthenticatedMiddleware])
-  .inputValidator(z.object({ imageUrl: z.url(), inputBlobId: z.string() }))
+  .inputValidator(
+    z.object({
+      imageUrl: z.url(),
+      inputBlobId: z.string(),
+      layerCount: z.number().int().min(2).max(10).default(4),
+    }),
+  )
   .handler(async ({ data, context }): Promise<Project> => {
-    const { imageUrl, inputBlobId } = data;
+    const { imageUrl, inputBlobId, layerCount } = data;
 
     // Create project first
     const [project] = await db
@@ -120,7 +126,7 @@ const createProject = createServerFn({ method: "POST" })
 
     // Run image layering and name generation in parallel
     const [imageResult, generatedName] = await Promise.all([
-      fal.subscribe(IMAGE_ENDPOINT_ID, { input: { image_url: imageUrl } }),
+      fal.subscribe(IMAGE_ENDPOINT_ID, { input: { image_url: imageUrl, num_layers: layerCount } }),
       generateProjectName(imageUrl),
     ]);
 
@@ -141,7 +147,7 @@ const createProject = createServerFn({ method: "POST" })
         projectId: project.id,
         userId: context.session.user.id,
         endpointId: IMAGE_ENDPOINT_ID,
-        input: JSON.stringify({ image_url: imageUrl }),
+        input: JSON.stringify({ image_url: imageUrl, num_layers: layerCount }),
         output: JSON.stringify(imageOutput),
       })
       .returning({ id: predictions.id });

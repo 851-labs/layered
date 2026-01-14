@@ -68,7 +68,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <button
           onClick={resetRotation}
-          className="p-2.5 bg-white/90 hover:bg-white rounded-lg transition-colors shadow-sm border border-stone-200/60"
+          className="p-2.5 bg-white/90 hover:bg-white transition-colors shadow-sm border border-stone-200/60"
           title="Reset view"
         >
           <ArrowCounterClockwiseIcon className="w-4 h-4 text-stone-600" />
@@ -76,7 +76,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
       </div>
 
       {/* Drag hint */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 rounded-full shadow-sm border border-stone-200/60">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-3 py-1.5 bg-white/90 shadow-sm border border-stone-200/60">
         <ArrowsOutCardinalIcon className="w-3 h-3 text-stone-400" />
         <span className="text-xs text-stone-500">Drag to rotate</span>
       </div>
@@ -117,7 +117,7 @@ function LayerViewer3D({ layers, className = "" }: LayerViewer3DProps) {
                 <img
                   src={layer.url}
                   alt={`Layer ${index + 1}`}
-                  className="max-w-[320px] max-h-[280px] w-auto h-auto rounded-lg"
+                  className="max-w-[320px] max-h-[280px] w-auto h-auto"
                   style={{
                     boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.2)",
                   }}

@@ -2,13 +2,14 @@ import { GithubLogoIcon } from "@phosphor-icons/react";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
 import { authClient } from "../../lib/auth/client";
+import { Separator } from "../../ui/separator";
 
 function MarketingHeader() {
   const { data: session } = authClient.useSession();
 
   return (
-    <header className="h-14 border-b border-stone-200/60 bg-stone-50/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="h-full max-w-4xl mx-auto px-6 flex items-center justify-between">
+    <header className="h-14 bg-stone-50/80 backdrop-blur-sm sticky top-0 z-50 flex flex-col">
+      <div className="flex-1 max-w-4xl w-full mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="text-[15px] font-medium text-stone-800 tracking-tight">Layered</span>
         </Link>
@@ -42,6 +43,7 @@ function MarketingHeader() {
           )}
         </div>
       </div>
+      <Separator />
     </header>
   );
 }
