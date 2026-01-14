@@ -1,3 +1,4 @@
+import { useScrollLock } from "@base-ui/utils/useScrollLock";
 import { SignOutIcon } from "@phosphor-icons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
@@ -63,6 +64,7 @@ function AppHeader() {
 
 function AppLayout() {
   useZoomLock();
+  useScrollLock(true);
 
   return (
     <>

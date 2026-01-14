@@ -18,6 +18,7 @@
       "name": "@layered/web",
       "dependencies": {
         "@base-ui/react": "^1.0.0",
+        "@base-ui/utils": "^0.2.3",
         "@fal-ai/client": "^1.8.3",
         "@fontsource-variable/jetbrains-mono": "^5.2.8",
         "@phosphor-icons/react": "^2.1.10",
