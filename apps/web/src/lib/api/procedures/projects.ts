@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { env } from "cloudflare:workers";
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 
+import { auth } from "../../auth/server";
 import { db } from "../../db";
 import { blobs, predictionBlobs, predictions, projects } from "../../db/schema";
 import { getFalClient } from "../../fal";
@@ -262,12 +264,24 @@ const getProject = createServerFn({ method: "GET" })
   });
 
 /**
- * Get recent projects from the database.
+ * Get recent projects for the current user.
  */
 const listProjects = createServerFn({ method: "GET" })
   .middleware([errorHandlingMiddleware])
   .handler(async (): Promise<{ projects: Project[] }> => {
-    const projectRows = await db.select().from(projects).orderBy(desc(projects.createdAt)).limit(6);
+    const headers = getRequestHeaders();
+    const session = await auth.api.getSession({ headers });
+
+    if (!session?.user) {
+      return { projects: [] };
+    }
+
+    const projectRows = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.userId, session.user.id), isNotNull(projects.userId)))
+      .orderBy(desc(projects.createdAt))
+      .limit(6);
 
     const projectsWithData = await Promise.all(
       projectRows.map(async (project) => {
