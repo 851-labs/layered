@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { Separator } from "../../ui/separator";
+import { useZoomLock } from "../../utils/use-zoom-lock";
 
 function AppHeader() {
   const router = useRouter();
@@ -61,6 +62,8 @@ function AppHeader() {
 }
 
 function AppLayout() {
+  useZoomLock();
+
   return (
     <>
       <AppHeader />
