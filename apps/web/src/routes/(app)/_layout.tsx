@@ -1,5 +1,5 @@
 import { SignOutIcon } from "@phosphor-icons/react";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 
 import { authClient } from "../../lib/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
@@ -13,6 +13,7 @@ import {
 import { Separator } from "../../ui/separator";
 
 function AppHeader() {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
 
   return (
@@ -32,7 +33,14 @@ function AppHeader() {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem variant="destructive" onClick={() => authClient.signOut()}>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() =>
+                    authClient.signOut({
+                      fetchOptions: { onSuccess: () => router.navigate({ to: "/" }) },
+                    })
+                  }
+                >
                   <SignOutIcon />
                   Sign out
                 </DropdownMenuItem>
