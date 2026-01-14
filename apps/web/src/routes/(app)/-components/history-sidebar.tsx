@@ -8,6 +8,7 @@ import {
 } from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, useRef, useLayoutEffect } from "react";
+import { useDropzone } from "react-dropzone";
 
 import { api } from "@/lib/api";
 import { type Project } from "@/lib/api/schema";
@@ -66,30 +67,34 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
     return () => viewport.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleImageSelect = useCallback(() => {
-    if (isGenerating) return;
+  const processFile = useCallback((file: File) => {
+    if (!isSupportedContentType(file.type)) {
+      setError("Unsupported image format");
+      return;
+    }
 
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/png,image/jpeg,image/webp,image/gif";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+    setError(null);
+    setSelectedFile(file);
 
-      if (!isSupportedContentType(file.type)) {
-        setError("Unsupported image format");
-        return;
-      }
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }, []);
 
-      setError(null);
-      setSelectedFile(file);
-
-      const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  }, [isGenerating]);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles) => {
+      const file = acceptedFiles[0];
+      if (file) processFile(file);
+    },
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/webp": [".webp"],
+      "image/gif": [".gif"],
+    },
+    disabled: isGenerating,
+    multiple: false,
+  });
 
   const handleClearImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -154,15 +159,17 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
       <div className="p-3 space-y-3">
         {/* Image Selector */}
         <div
-          onClick={handleImageSelect}
+          {...getRootProps()}
           className={cn(
             "relative aspect-video border border-stone-300 transition-all cursor-pointer overflow-hidden",
             preview
               ? "bg-stone-100"
               : "border-dashed bg-stone-50 hover:border-stone-400 hover:bg-stone-100",
             isGenerating && "opacity-50 cursor-not-allowed",
+            isDragActive && "border-stone-500 bg-stone-100",
           )}
         >
+          <input {...getInputProps()} />
           {preview ? (
             <>
               <img src={preview} alt="Selected" className="w-full h-full object-contain" />
@@ -178,7 +185,9 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
               <ImageIcon className="w-6 h-6 text-stone-400" />
-              <span className="text-xs text-stone-500">Click to upload</span>
+              <span className="text-xs text-stone-500">
+                {isDragActive ? "Drop image here" : "Drop image or click to upload"}
+              </span>
             </div>
           )}
         </div>
