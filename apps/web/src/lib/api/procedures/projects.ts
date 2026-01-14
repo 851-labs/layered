@@ -14,7 +14,7 @@ import {
   createQueryProcedure,
   createQueryProcedureWithInput,
 } from "../create-procedure";
-import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware";
+import { throwIfUnauthenticatedMiddleware } from "../middleware";
 import { type Blob, type Project } from "../schema";
 
 // -----------------------------------------------------------------------------
@@ -112,7 +112,7 @@ function getOutputBlobs(prediction: {
  * Create a new project with parallel image layering and name generation.
  */
 const createProject = createServerFn({ method: "POST" })
-  .middleware([errorHandlingMiddleware, throwIfUnauthenticatedMiddleware])
+  .middleware([throwIfUnauthenticatedMiddleware])
   .inputValidator(
     z.object({
       imageUrl: z.url(),
@@ -215,7 +215,6 @@ const createProject = createServerFn({ method: "POST" })
  * Get a single project by ID.
  */
 const getProject = createServerFn({ method: "GET" })
-  .middleware([errorHandlingMiddleware])
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }): Promise<Project> => {
     const project = await db.select().from(projects).where(eq(projects.id, data.id)).get();
@@ -266,9 +265,8 @@ const getProject = createServerFn({ method: "GET" })
 /**
  * Get recent projects for the current user.
  */
-const listProjects = createServerFn({ method: "GET" })
-  .middleware([errorHandlingMiddleware])
-  .handler(async (): Promise<{ projects: Project[] }> => {
+const listProjects = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ projects: Project[] }> => {
     const headers = getRequestHeaders();
     const session = await auth.api.getSession({ headers });
 
@@ -327,7 +325,8 @@ const listProjects = createServerFn({ method: "GET" })
     );
 
     return { projects: projectsWithData };
-  });
+  },
+);
 
 // -----------------------------------------------------------------------------
 // Router

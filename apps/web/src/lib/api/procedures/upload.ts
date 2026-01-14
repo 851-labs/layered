@@ -6,7 +6,7 @@ import { generateId } from "../../../utils/uuid";
 import { db } from "../../db";
 import { blobs, contentTypeEnum } from "../../db/schema";
 import { createMutationProcedureWithInput } from "../create-procedure";
-import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware";
+import { throwIfUnauthenticatedMiddleware } from "../middleware";
 
 // -----------------------------------------------------------------------------
 // Server Functions
@@ -16,7 +16,7 @@ import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../mi
  * Upload an image to R2 storage and create a blob record.
  */
 const uploadImage = createServerFn({ method: "POST" })
-  .middleware([errorHandlingMiddleware, throwIfUnauthenticatedMiddleware])
+  .middleware([throwIfUnauthenticatedMiddleware])
   .inputValidator(
     z.object({
       base64: z.string(),
