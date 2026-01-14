@@ -1,5 +1,5 @@
 import { redirect } from "@tanstack/react-router";
-import { createMiddleware } from "@tanstack/react-start";
+import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { auth } from "../auth/server";
@@ -40,8 +40,19 @@ const throwIfUnauthenticatedMiddleware = createMiddleware().server(async ({ next
   return await next({ context: { session } });
 });
 
+/**
+ * Server function to check auth and redirect - for use in route beforeLoad
+ */
+const requireAuth = createServerFn({ method: "GET" })
+  .middleware([redirectIfUnauthenticatedMiddleware])
+  .handler(async () => {
+    // Middleware handles auth check and redirect
+    return { authenticated: true };
+  });
+
 export {
   errorHandlingMiddleware,
   redirectIfUnauthenticatedMiddleware,
   throwIfUnauthenticatedMiddleware,
+  requireAuth,
 };

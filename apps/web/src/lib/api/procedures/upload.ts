@@ -5,6 +5,7 @@ import { z } from "zod";
 import { generateId } from "../../../utils/uuid";
 import { db } from "../../db";
 import { blobs, contentTypeEnum } from "../../db/schema";
+import { createMutationProcedureWithInput } from "../create-procedure";
 import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware";
 
 // -----------------------------------------------------------------------------
@@ -67,7 +68,7 @@ const uploadImage = createServerFn({ method: "POST" })
 // -----------------------------------------------------------------------------
 
 const uploadRouter = {
-  image: uploadImage,
+  image: createMutationProcedureWithInput(["upload", "image"], uploadImage),
 };
 
 export { uploadRouter };

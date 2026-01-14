@@ -173,16 +173,15 @@ function LandingPage() {
           reader.readAsDataURL(file);
         });
 
-        const { blobId, url } = await api.upload.image({
-          data: {
-            base64,
-            contentType: file.type,
-            fileName: file.name,
-          },
+        const { blobId, url } = await api.upload.image.mutate({
+          base64,
+          contentType: file.type,
+          fileName: file.name,
         });
 
-        const result = await api.project.create({
-          data: { imageUrl: url, inputBlobId: blobId },
+        const result = await api.project.create.mutate({
+          imageUrl: url,
+          inputBlobId: blobId,
         });
 
         if (!result.outputBlobs || result.outputBlobs.length === 0) {

@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 
@@ -15,7 +16,9 @@ type LayerState = {
 };
 
 function ProjectPage() {
-  const { project, projects } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const { data: project } = useSuspenseQuery(api.project.get.queryOptions({ id }));
+  const { data: projectsData } = useSuspenseQuery(api.project.list.queryOptions());
 
   const [layers, setLayers] = useState<LayerState[]>(() =>
     project.outputBlobs.map((blob: Blob) => ({
@@ -39,7 +42,7 @@ function ProjectPage() {
     <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)]!">
       {/* Left sidebar: History */}
       <ResizablePanel minSize={200} defaultSize={240} maxSize={300}>
-        <HistorySidebar projects={projects} currentId={project.id} />
+        <HistorySidebar projects={projectsData.projects} currentId={project.id} />
       </ResizablePanel>
 
       <ResizableHandle />
@@ -64,16 +67,15 @@ function ProjectPage() {
 }
 
 const Route = createFileRoute("/(app)/_layout/project/$id")({
-  loader: async ({ params }) => {
-    const [project, { projects }] = await Promise.all([
-      api.project.get({ data: { id: params.id } }),
-      api.project.list(),
+  loader: async ({ params, context: { queryClient } }) => {
+    await Promise.all([
+      queryClient.ensureQueryData(api.project.get.queryOptions({ id: params.id })),
+      queryClient.ensureQueryData(api.project.list.queryOptions()),
     ]);
-    return { project, projects };
   },
   component: function ProjectPageWrapper() {
-    const { project } = Route.useLoaderData();
-    return <ProjectPage key={project.id} />;
+    const { id } = Route.useParams();
+    return <ProjectPage key={id} />;
   },
 });
 

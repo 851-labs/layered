@@ -7,6 +7,11 @@ import { db } from "../../db";
 import { blobs, predictionBlobs, predictions, projects } from "../../db/schema";
 import { getFalClient } from "../../fal";
 import { endpointSchemas } from "../../fal/schema";
+import {
+  createMutationProcedureWithInput,
+  createQueryProcedure,
+  createQueryProcedureWithInput,
+} from "../create-procedure";
 import { errorHandlingMiddleware, throwIfUnauthenticatedMiddleware } from "../middleware";
 import { type Blob, type Project } from "../schema";
 
@@ -315,9 +320,9 @@ const listProjects = createServerFn({ method: "GET" })
 // -----------------------------------------------------------------------------
 
 const projectRouter = {
-  create: createProject,
-  get: getProject,
-  list: listProjects,
+  create: createMutationProcedureWithInput(["project", "create"], createProject),
+  get: createQueryProcedureWithInput(["project"], getProject),
+  list: createQueryProcedure(["projects"], listProjects),
 };
 
 export { projectRouter };

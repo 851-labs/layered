@@ -80,16 +80,16 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
         reader.readAsDataURL(selectedFile);
       });
 
-      const { blobId, url } = await api.upload.image({
-        data: {
-          base64,
-          contentType: selectedFile.type as SupportedContentType,
-          fileName: selectedFile.name,
-        },
+      const { blobId, url } = await api.upload.image.mutate({
+        base64,
+        contentType: selectedFile.type as SupportedContentType,
+        fileName: selectedFile.name,
       });
 
-      const result = await api.project.create({
-        data: { imageUrl: url, inputBlobId: blobId, layerCount },
+      const result = await api.project.create.mutate({
+        imageUrl: url,
+        inputBlobId: blobId,
+        layerCount,
       });
 
       // Reset form after successful generation

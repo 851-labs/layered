@@ -1,10 +1,14 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 import { configure } from "onedollarstats";
 import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 
-const Route = createRootRoute({
+const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
   head: () => ({
     meta: [
       {
