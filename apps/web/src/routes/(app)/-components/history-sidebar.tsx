@@ -7,6 +7,7 @@ import { type Project } from "@/lib/api/schema";
 import { Button } from "@/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/ui/button-group";
 import { Input } from "@/ui/input";
+import { ScrollArea } from "@/ui/scroll-area";
 import { Separator } from "@/ui/separator";
 import { cn } from "@/utils/cn";
 
@@ -188,8 +189,14 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
       </div>
       <Separator />
 
+      {/* History header */}
+      <div className="px-4 py-3">
+        <h2 className="text-xs font-medium text-stone-700">History</h2>
+      </div>
+      <Separator />
+
       {/* Projects list */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1 min-h-0">
         {projects.map((project) => {
           const isActive = project.id === currentId;
 
@@ -229,7 +236,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
         {projects.length === 0 && (
           <div className="text-center py-8 text-sm text-stone-400">No projects yet</div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }
