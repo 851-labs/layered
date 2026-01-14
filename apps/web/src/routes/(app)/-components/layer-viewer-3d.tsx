@@ -14,7 +14,7 @@ type LayerViewer3DProps = {
   layers: Layer[];
 };
 
-const DEFAULT_ROTATION = { x: 15, y: -25 };
+const DEFAULT_ROTATION = { x: 15, y: 25 };
 const DEFAULT_ZOOM = 1;
 const DEFAULT_SPACING = 80;
 const ZOOM_MIN = 0.5;
