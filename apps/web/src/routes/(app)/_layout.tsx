@@ -1,43 +1,30 @@
-import { GithubLogoIcon } from "@phosphor-icons/react";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
 import { authClient } from "../../lib/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
+import { Button } from "../../ui/button";
 import { Separator } from "../../ui/separator";
 
 function AppHeader() {
   const { data: session } = authClient.useSession();
 
   return (
-    <header className="h-14 bg-white sticky top-0 z-50 flex flex-col">
+    <header className="h-12 bg-white sticky top-0 z-50 flex flex-col">
       <div className="flex-1 max-w-[1400px] w-full mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="text-[15px] font-medium text-stone-800 tracking-tight">Layered</span>
         </Link>
 
         <div className="flex items-center gap-4">
-          <a
-            href="https://github.com/851-labs/layered"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 -m-2 text-stone-500 hover:text-stone-900 transition-colors"
-            aria-label="GitHub"
-          >
-            <GithubLogoIcon className="w-5 h-5" />
-          </a>
-
           {session?.user ? (
-            <Avatar>
+            <Avatar size="sm">
               <AvatarImage src={session.user.image ?? ""} alt={session.user.name ?? ""} />
               <AvatarFallback>{session.user.name?.charAt(0) ?? "U"}</AvatarFallback>
             </Avatar>
           ) : (
-            <button
-              onClick={() => authClient.signIn.social({ provider: "google" })}
-              className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
-            >
+            <Button size="sm" onClick={() => authClient.signIn.social({ provider: "google" })}>
               Sign in
-            </button>
+            </Button>
           )}
         </div>
       </div>
