@@ -3,6 +3,7 @@ import { SignOutIcon } from "@phosphor-icons/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 
+import { useNavigationSwipeLock } from "../../hooks/use-navigation-swipe-lock";
 import { useZoomLock } from "../../hooks/use-zoom-lock";
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth/client";
@@ -63,8 +64,9 @@ function AppHeader() {
 }
 
 function AppLayout() {
-  useZoomLock();
+  useNavigationSwipeLock();
   useScrollLock(true);
+  useZoomLock();
 
   return (
     <>
