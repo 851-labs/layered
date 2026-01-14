@@ -1,10 +1,11 @@
 import { SignOutIcon } from "@phosphor-icons/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 
 import { api } from "../../lib/api";
 import { authClient } from "../../lib/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
+import { Button } from "../../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,7 @@ import { Separator } from "../../ui/separator";
 
 function AppHeader() {
   const router = useRouter();
-  const { data: user } = useSuspenseQuery(api.account.get.queryOptions());
+  const { data: user } = useQuery(api.account.get.queryOptions());
 
   return (
     <header className="h-12 bg-white sticky top-0 z-50 flex flex-col">
@@ -25,27 +26,33 @@ function AppHeader() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="cursor-pointer outline-none">
-              <Avatar size="sm">
-                <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
-                <AvatarFallback>{user.name?.charAt(0) ?? "U"}</AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() =>
-                  authClient.signOut({
-                    fetchOptions: { onSuccess: () => router.navigate({ to: "/" }) },
-                  })
-                }
-              >
-                <SignOutIcon />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="cursor-pointer outline-none">
+                <Avatar size="sm">
+                  <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
+                  <AvatarFallback>{user.name?.charAt(0) ?? "U"}</AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() =>
+                    authClient.signOut({
+                      fetchOptions: { onSuccess: () => router.navigate({ to: "/" }) },
+                    })
+                  }
+                >
+                  <SignOutIcon />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button size="sm" onClick={() => authClient.signIn.social({ provider: "google" })}>
+              Sign in
+            </Button>
+          )}
         </div>
       </div>
       <Separator />
@@ -63,9 +70,6 @@ function AppLayout() {
 }
 
 const Route = createFileRoute("/(app)/_layout")({
-  loader: async ({ context: { queryClient } }) => {
-    await queryClient.ensureQueryData(api.account.get.queryOptions());
-  },
   component: AppLayout,
 });
 
