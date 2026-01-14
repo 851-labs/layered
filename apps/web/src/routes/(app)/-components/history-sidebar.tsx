@@ -80,7 +80,10 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
     if (!selectedFile || isGenerating) return;
 
     if (!session?.user) {
-      void authClient.signIn.social({ provider: "google" });
+      void authClient.signIn.social({
+        provider: "google",
+        callbackURL: window.location.pathname,
+      });
       return;
     }
 
