@@ -1,6 +1,7 @@
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 
 import { Button } from "@/ui/button";
+import { ScrollArea } from "@/ui/scroll-area";
 import { Separator } from "@/ui/separator";
 import { Slider } from "@/ui/slider";
 import { cn } from "@/utils/cn";
@@ -27,7 +28,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelP
       <Separator />
 
       {/* Layers list */}
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea className="flex-1 min-h-0">
         {layers.map((layer, index) => (
           <div key={index}>
             <div
@@ -84,7 +85,7 @@ function LayerPanel({ layers, onToggleVisibility, onOpacityChange }: LayerPanelP
             </div>
           </div>
         ))}
-      </div>
+      </ScrollArea>
     </div>
   );
 }
