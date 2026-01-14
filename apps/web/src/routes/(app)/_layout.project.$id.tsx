@@ -36,25 +36,23 @@ function ProjectPage() {
   }, []);
 
   return (
-    <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)] bg-stone-50">
+    <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)]!">
       {/* Left sidebar: History */}
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+      <ResizablePanel minSize={200} defaultSize={240} maxSize={300}>
         <HistorySidebar projects={projects} currentId={project.id} />
       </ResizablePanel>
 
       <ResizableHandle />
 
       {/* Center: 3D Viewer */}
-      <ResizablePanel defaultSize={60}>
-        <div className="flex items-center justify-center bg-stone-50 h-full">
-          <LayerViewer3D layers={layers} className="w-full h-full" />
-        </div>
+      <ResizablePanel>
+        <LayerViewer3D layers={layers} />
       </ResizablePanel>
 
       <ResizableHandle />
 
       {/* Right sidebar: Layers */}
-      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+      <ResizablePanel minSize={200} defaultSize={288} maxSize={300}>
         <LayerPanel
           layers={layers}
           onToggleVisibility={handleToggleVisibility}
