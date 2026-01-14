@@ -27,7 +27,7 @@ function LayerViewer3D({ layers }: LayerViewer3DProps) {
   const [rotation, setRotation] = useState(DEFAULT_ROTATION);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [spread, setSpread] = useState(0);
+  const [spread, setSpread] = useState(1);
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [spacing, setSpacing] = useState(DEFAULT_SPACING);
 
@@ -35,8 +35,14 @@ function LayerViewer3D({ layers }: LayerViewer3DProps) {
   const [initialPinchDistance, setInitialPinchDistance] = useState<number | null>(null);
   const [initialZoom, setInitialZoom] = useState(DEFAULT_ZOOM);
 
-  // Animate spread on mount and when layers change
+  // Animate spread when layers change (but not on initial mount)
+  const isInitialMount = useRef(true);
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    // Only animate spread on layer changes, not initial mount
     setSpread(0);
     const timer = setTimeout(() => setSpread(1), 100);
     return () => clearTimeout(timer);
