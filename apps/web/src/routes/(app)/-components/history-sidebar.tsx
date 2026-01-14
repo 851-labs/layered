@@ -11,6 +11,7 @@ import { useState, useCallback } from "react";
 
 import { api } from "@/lib/api";
 import { type Project } from "@/lib/api/schema";
+import { authClient } from "@/lib/auth/client";
 import { Alert, AlertTitle } from "@/ui/alert";
 import { Button } from "@/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/ui/button-group";
@@ -37,6 +38,7 @@ type HistorySidebarProps = {
 
 function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
   const navigate = useNavigate();
+  const { data: session } = authClient.useSession();
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -77,6 +79,11 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
   const handleGenerate = useCallback(async () => {
     if (!selectedFile || isGenerating) return;
 
+    if (!session?.user) {
+      void authClient.signIn.social({ provider: "google" });
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     try {
@@ -109,12 +116,13 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
       setLayerCount(DEFAULT_LAYERS);
 
       void navigate({ to: "/project/$id", params: { id: result.id } });
-    } catch {
-      setError("Generation failed. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Generation failed. Please try again.";
+      setError(message);
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedFile, layerCount, navigate, isGenerating]);
+  }, [selectedFile, layerCount, navigate, isGenerating, session]);
 
   return (
     <div className="bg-white flex flex-col h-full">
