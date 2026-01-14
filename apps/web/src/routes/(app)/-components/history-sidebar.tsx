@@ -1,9 +1,17 @@
-import { CircleNotchIcon, ImageIcon, MinusIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
+import {
+  CircleNotchIcon,
+  ImageIcon,
+  MinusIcon,
+  PlusIcon,
+  WarningCircleIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 
 import { api } from "@/lib/api";
 import { type Project } from "@/lib/api/schema";
+import { Alert, AlertTitle } from "@/ui/alert";
 import { Button } from "@/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/ui/button-group";
 import { Input } from "@/ui/input";
@@ -33,6 +41,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [layerCount, setLayerCount] = useState(DEFAULT_LAYERS);
+  const [error, setError] = useState<string | null>(null);
 
   const handleImageSelect = useCallback(() => {
     if (isGenerating) return;
@@ -45,10 +54,11 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
       if (!file) return;
 
       if (!isSupportedContentType(file.type)) {
-        console.error(`Unsupported image format: ${file.type || "unknown"}`);
+        setError("Unsupported image format");
         return;
       }
 
+      setError(null);
       setSelectedFile(file);
 
       const reader = new FileReader();
@@ -68,6 +78,7 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
     if (!selectedFile || isGenerating) return;
 
     setIsGenerating(true);
+    setError(null);
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -98,8 +109,8 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
       setLayerCount(DEFAULT_LAYERS);
 
       void navigate({ to: "/project/$id", params: { id: result.id } });
-    } catch (err) {
-      console.error("Generation failed:", err);
+    } catch {
+      setError("Generation failed. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -186,6 +197,13 @@ function HistorySidebar({ projects, currentId }: HistorySidebarProps) {
           ) : null}
           {isGenerating ? "Generating..." : "Generate"}
         </Button>
+
+        {error && (
+          <Alert variant="destructive">
+            <WarningCircleIcon />
+            <AlertTitle>{error}</AlertTitle>
+          </Alert>
+        )}
       </div>
       <Separator />
 
