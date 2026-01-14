@@ -6,6 +6,7 @@ import { LayerPanel } from "../../components/layer-panel";
 import { LayerViewer3D } from "../../components/layer-viewer-3d";
 import { api } from "../../lib/api";
 import { type Blob } from "../../lib/api/schema";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../../ui/resizable";
 
 type LayerState = {
   url: string;
@@ -35,22 +36,32 @@ function ProjectPage() {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-56px)] flex bg-stone-50">
+    <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)] bg-stone-50">
       {/* Left sidebar: History */}
-      <HistorySidebar projects={projects} currentId={project.id} />
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+        <HistorySidebar projects={projects} currentId={project.id} />
+      </ResizablePanel>
+
+      <ResizableHandle />
 
       {/* Center: 3D Viewer */}
-      <div className="flex-1 flex items-center justify-center bg-stone-100/50">
-        <LayerViewer3D layers={layers} className="w-full h-full" />
-      </div>
+      <ResizablePanel defaultSize={60}>
+        <div className="flex items-center justify-center bg-stone-50 h-full">
+          <LayerViewer3D layers={layers} className="w-full h-full" />
+        </div>
+      </ResizablePanel>
+
+      <ResizableHandle />
 
       {/* Right sidebar: Layers */}
-      <LayerPanel
-        layers={layers}
-        onToggleVisibility={handleToggleVisibility}
-        onOpacityChange={handleOpacityChange}
-      />
-    </div>
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+        <LayerPanel
+          layers={layers}
+          onToggleVisibility={handleToggleVisibility}
+          onOpacityChange={handleOpacityChange}
+        />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 
