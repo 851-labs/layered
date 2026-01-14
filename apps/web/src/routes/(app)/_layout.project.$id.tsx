@@ -67,6 +67,7 @@ function ProjectPage() {
 }
 
 const Route = createFileRoute("/(app)/_layout/project/$id")({
+  ssr: false,
   loader: async ({ params, context: { queryClient } }) => {
     await Promise.all([
       queryClient.ensureQueryData(api.project.get.queryOptions({ id: params.id })),
