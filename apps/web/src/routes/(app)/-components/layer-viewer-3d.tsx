@@ -14,7 +14,7 @@ type LayerViewer3DProps = {
   layers: Layer[];
 };
 
-const DEFAULT_ROTATION = { x: 15, y: 25 };
+const DEFAULT_ROTATION = { x: -15, y: 50 };
 const DEFAULT_ZOOM = 1;
 const DEFAULT_SPACING = 80;
 const ZOOM_MIN = 0.5;
@@ -138,7 +138,8 @@ function LayerViewer3D({ layers }: LayerViewer3DProps) {
     setSpacing(newValue);
   };
 
-  const visibleLayers = layers.filter((l) => l.visible);
+  // Reverse so layer 0 (background) renders at the back and layer N (foreground) at the front
+  const visibleLayers = layers.filter((l) => l.visible).reverse();
   const layerSpacing = spacing * spread;
 
   return (
@@ -228,14 +229,15 @@ function LayerViewer3D({ layers }: LayerViewer3DProps) {
                   transform: `translate(-50%, -50%) translateZ(${zOffset}px)`,
                   opacity: layer.opacity,
                   transformStyle: "preserve-3d",
+                  zIndex: visibleLayers.length - index,
                 }}
               >
                 <img
                   src={layer.url}
                   alt={`Layer ${index + 1}`}
-                  className="max-w-[320px] max-h-[280px] w-auto h-auto"
+                  className="max-w-[320px] max-h-[280px] w-auto h-auto transition-shadow duration-300"
                   style={{
-                    boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.2)",
+                    boxShadow: layerSpacing > 0 ? "0 20px 40px -15px rgba(0, 0, 0, 0.2)" : "none",
                   }}
                   draggable={false}
                 />
