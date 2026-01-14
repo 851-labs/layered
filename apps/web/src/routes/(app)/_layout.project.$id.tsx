@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 
-import { HistorySidebar } from "../../components/history-sidebar";
-import { LayerPanel } from "../../components/layer-panel";
-import { LayerViewer3D } from "../../components/layer-viewer-3d";
 import { api } from "../../lib/api";
 import { type Blob } from "../../lib/api/schema";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../../ui/resizable";
+import { HistorySidebar } from "./-components/history-sidebar";
+import { LayerPanel } from "./-components/layer-panel";
+import { LayerViewer3D } from "./-components/layer-viewer-3d";
 
 type LayerState = {
   url: string;

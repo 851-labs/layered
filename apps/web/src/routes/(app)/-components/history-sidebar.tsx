@@ -2,13 +2,13 @@ import { CircleNotchIcon, ImageIcon, MinusIcon, PlusIcon, XIcon } from "@phospho
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback } from "react";
 
-import { api } from "../lib/api";
-import { type Project } from "../lib/api/schema";
-import { Button } from "../ui/button";
-import { ButtonGroup, ButtonGroupText } from "../ui/button-group";
-import { Input } from "../ui/input";
-import { Separator } from "../ui/separator";
-import { cn } from "../utils/cn";
+import { api } from "@/lib/api";
+import { type Project } from "@/lib/api/schema";
+import { Button } from "@/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@/ui/button-group";
+import { Input } from "@/ui/input";
+import { Separator } from "@/ui/separator";
+import { cn } from "@/utils/cn";
 
 const SUPPORTED_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"] as const;
 type SupportedContentType = (typeof SUPPORTED_CONTENT_TYPES)[number];

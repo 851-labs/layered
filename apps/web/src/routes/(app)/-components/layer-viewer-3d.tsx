@@ -1,8 +1,8 @@
 import { ArrowCounterClockwiseIcon, ArrowsOutCardinalIcon } from "@phosphor-icons/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
-import { Slider } from "../ui/slider";
-import { cn } from "../utils/cn";
+import { Slider } from "@/ui/slider";
+import { cn } from "@/utils/cn";
 
 type Layer = {
   url: string;
