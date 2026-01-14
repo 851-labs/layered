@@ -1,4 +1,4 @@
-import { SignOut } from "@phosphor-icons/react";
+import { SignOutIcon } from "@phosphor-icons/react";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
 import { authClient } from "../../lib/auth/client";
@@ -33,7 +33,7 @@ function AppHeader() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem variant="destructive" onClick={() => authClient.signOut()}>
-                  <SignOut />
+                  <SignOutIcon />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
