@@ -16,11 +16,11 @@ type LayerViewer3DProps = {
 
 const DEFAULT_ROTATION = { x: 15, y: -25 };
 const DEFAULT_ZOOM = 1;
-const DEFAULT_SPACING = 50;
+const DEFAULT_SPACING = 80;
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2.5;
 const SPACING_MIN = 0;
-const SPACING_MAX = 100;
+const SPACING_MAX = 200;
 
 function LayerViewer3D({ layers }: LayerViewer3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
