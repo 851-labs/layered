@@ -184,11 +184,7 @@ function LandingPage() {
           inputBlobId: blobId,
         });
 
-        if (!result.outputBlobs || result.outputBlobs.length === 0) {
-          throw new Error("No layers were extracted from the image");
-        }
-
-        // Navigate to the project page
+        // Navigate to the project page immediately (it will show loading state)
         void navigate({ to: "/project/$id", params: { id: result.id } });
       } catch (err) {
         console.error("Processing failed:", err);

@@ -1,9 +1,11 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { CircleNotchIcon } from "@phosphor-icons/react";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import ms from "ms";
+import { useCallback, useEffect, useState } from "react";
 
 import { api } from "../../lib/api";
-import { type Blob } from "../../lib/api/schema";
+import { type Blob, type Project } from "../../lib/api/schema";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../../ui/resizable";
 import { HistorySidebar } from "./-components/history-sidebar";
 import { LayerPanel } from "./-components/layer-panel";
@@ -15,18 +17,66 @@ type LayerState = {
   opacity: number;
 };
 
+function CenterContent({ project, layers }: { project: Project; layers: LayerState[] }) {
+  if (project.status === "processing") {
+    return (
+      <div className="h-full flex items-center justify-center bg-stone-50">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <img
+              src={project.inputBlob.url}
+              alt="Processing"
+              className="w-64 h-64 object-contain opacity-50"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <CircleNotchIcon className="w-12 h-12 text-stone-600 animate-spin" />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-stone-600 font-medium">Generating layers...</p>
+            <p className="text-sm text-stone-400 mt-1">This usually takes 10-15 seconds</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (project.status === "failed") {
+    return (
+      <div className="h-full flex items-center justify-center bg-stone-50">
+        <div className="text-center">
+          <p className="text-red-600 font-medium">Generation failed</p>
+          <p className="text-sm text-stone-400 mt-1">Please try uploading your image again</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <LayerViewer3D layers={layers} />;
+}
+
 function ProjectPage() {
   const { id } = Route.useParams();
-  const { data: project } = useSuspenseQuery(api.project.get.queryOptions({ id }));
+  const { data: project } = useQuery({
+    ...api.project.get.queryOptions({ id }),
+    refetchInterval: (query) => (query.state.data?.status === "processing" ? ms("1s") : false),
+  });
   const { data: projectsData } = useSuspenseQuery(api.project.list.queryOptions());
 
-  const [layers, setLayers] = useState<LayerState[]>(() =>
-    project.outputBlobs.map((blob: Blob) => ({
-      url: blob.url,
-      visible: true,
-      opacity: 1,
-    })),
-  );
+  const [layers, setLayers] = useState<LayerState[]>([]);
+
+  // Sync layers when project data changes (e.g., when processing completes)
+  useEffect(() => {
+    if (project?.status === "completed" && project.outputBlobs.length > 0) {
+      setLayers(
+        project.outputBlobs.map((blob: Blob) => ({
+          url: blob.url,
+          visible: true,
+          opacity: 1,
+        })),
+      );
+    }
+  }, [project?.status, project?.outputBlobs]);
 
   const handleToggleVisibility = useCallback((index: number) => {
     setLayers((prev) =>
@@ -38,6 +88,12 @@ function ProjectPage() {
     setLayers((prev) => prev.map((layer, i) => (i === index ? { ...layer, opacity } : layer)));
   }, []);
 
+  if (!project) {
+    return null;
+  }
+
+  const isProcessing = project.status !== "completed";
+
   return (
     <ClientOnly>
       <ResizablePanelGroup orientation="horizontal" className="h-[calc(100vh-48px)]!">
@@ -48,20 +104,24 @@ function ProjectPage() {
 
         <ResizableHandle />
 
-        {/* Center: 3D Viewer */}
+        {/* Center: 3D Viewer or Loading State */}
         <ResizablePanel>
-          <LayerViewer3D layers={layers} />
+          <CenterContent project={project} layers={layers} />
         </ResizablePanel>
 
         <ResizableHandle />
 
-        {/* Right sidebar: Layers */}
+        {/* Right sidebar: Layers (hidden while processing) */}
         <ResizablePanel minSize={200} defaultSize={288} maxSize={300}>
-          <LayerPanel
-            layers={layers}
-            onToggleVisibility={handleToggleVisibility}
-            onOpacityChange={handleOpacityChange}
-          />
+          {isProcessing ? (
+            <div className="h-full bg-stone-50" />
+          ) : (
+            <LayerPanel
+              layers={layers}
+              onToggleVisibility={handleToggleVisibility}
+              onOpacityChange={handleOpacityChange}
+            />
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
     </ClientOnly>

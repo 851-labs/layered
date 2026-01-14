@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `status` text NOT NULL DEFAULT 'completed';

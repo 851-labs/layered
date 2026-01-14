@@ -60,9 +60,9 @@
   ],
   "workflows": [
     {
-      "name": "upload-prediction-blobs-workflow",
-      "binding": "UPLOAD_PREDICTION_BLOBS_WORKFLOW",
-      "class_name": "UploadPredictionBlobsWorkflow",
+      "name": "generate-project-workflow",
+      "binding": "GENERATE_PROJECT_WORKFLOW",
+      "class_name": "GenerateProjectWorkflow",
     },
   ],
 }

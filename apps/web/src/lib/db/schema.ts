@@ -125,6 +125,9 @@ const projects = sqliteTable("projects", {
   id: text("id").primaryKey().$defaultFn(generateId),
   name: text("name"),
   userId: text("user_id").references(() => users.id),
+  status: text("status", { enum: statusEnum })
+    .notNull()
+    .$default(() => "processing"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),

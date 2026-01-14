@@ -50,6 +50,13 @@
       "when": 1767743125135,
       "tag": "0006_chief_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1768371635365,
+      "tag": "0007_simple_molten_man",
+      "breakpoints": true
     }
   ]
 }

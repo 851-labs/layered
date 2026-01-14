@@ -7,8 +7,6 @@ import { z } from "zod";
 import { auth } from "../../auth/server";
 import { db } from "../../db";
 import { blobs, predictionBlobs, predictions, projects } from "../../db/schema";
-import { getFalClient } from "../../fal";
-import { endpointSchemas } from "../../fal/schema";
 import {
   createMutationProcedureWithInput,
   createQueryProcedure,
@@ -22,47 +20,6 @@ import { type Blob, type Project } from "../schema";
 // -----------------------------------------------------------------------------
 
 const IMAGE_ENDPOINT_ID = "fal-ai/qwen-image-layered";
-const NAME_ENDPOINT_ID = "openai/gpt-4o-mini";
-const AI_GATEWAY_URL =
-  "https://gateway.ai.cloudflare.com/v1/630f294bcb2c1e9b751d9fe0655a453a/layered/openai";
-
-type OpenAIChatResponse = {
-  choices: Array<{ message: { content: string } }>;
-};
-
-async function generateProjectName(imageUrl: string): Promise<string | null> {
-  const response = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "cf-aig-authorization": `Bearer ${env.CF_AIG_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "image_url", image_url: { url: imageUrl } },
-            {
-              type: "text",
-              text: "Generate a 2-4 word title for this image. Reply with just the title, nothing else.",
-            },
-          ],
-        },
-      ],
-      max_tokens: 20,
-    }),
-  });
-
-  if (!response.ok) {
-    console.error("Failed to generate project name:", await response.text());
-    return null;
-  }
-
-  const data = (await response.json()) as OpenAIChatResponse;
-  return data.choices[0]?.message?.content?.trim() ?? null;
-}
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -86,30 +43,13 @@ function toPublicBlob(blob: Omit<BlobWithRole, "role">): Blob {
   };
 }
 
-function getOutputBlobs(prediction: {
-  outputBlobRows: Array<Omit<BlobWithRole, "role">>;
-  output: string;
-  status: "processing" | "completed" | "failed";
-}): Blob[] {
-  if (prediction.status === "completed") {
-    return prediction.outputBlobRows.map(toPublicBlob);
-  }
-  const output = endpointSchemas[IMAGE_ENDPOINT_ID].parse(JSON.parse(prediction.output));
-  return output.images.map((img, idx) => ({
-    id: `fal-${idx}`,
-    url: img.url,
-    contentType: "image/png",
-    width: img.width,
-    height: img.height,
-  }));
-}
-
 // -----------------------------------------------------------------------------
 // Server Functions
 // -----------------------------------------------------------------------------
 
 /**
- * Create a new project with parallel image layering and name generation.
+ * Create a new project and trigger background generation workflow.
+ * Returns immediately with project ID and status=processing.
  */
 const createProject = createServerFn({ method: "POST" })
   .middleware([throwIfUnauthenticatedMiddleware])
@@ -123,55 +63,28 @@ const createProject = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<Project> => {
     const { imageUrl, inputBlobId, layerCount } = data;
 
-    // Create project first
+    // Create project with processing status
     const [project] = await db
       .insert(projects)
-      .values({ userId: context.session.user.id })
+      .values({ userId: context.session.user.id, status: "processing" })
       .returning({ id: projects.id, createdAt: projects.createdAt });
 
-    const fal = getFalClient();
-
-    // Run image layering and name generation in parallel
-    const [imageResult, generatedName] = await Promise.all([
-      fal.subscribe(IMAGE_ENDPOINT_ID, { input: { image_url: imageUrl, num_layers: layerCount } }),
-      generateProjectName(imageUrl),
-    ]);
-
-    const imageOutput = endpointSchemas[IMAGE_ENDPOINT_ID].parse(imageResult.data);
-    if (!imageOutput.images || imageOutput.images.length === 0) {
-      throw new Error("No images returned from the model");
-    }
-
-    // Update project with the generated name (if we got one)
-    if (generatedName) {
-      await db.update(projects).set({ name: generatedName }).where(eq(projects.id, project.id));
-    }
-
-    // Store image prediction
-    const [imagePrediction] = await db
+    // Create prediction placeholder (output will be populated by workflow)
+    const [prediction] = await db
       .insert(predictions)
       .values({
         projectId: project.id,
         userId: context.session.user.id,
         endpointId: IMAGE_ENDPOINT_ID,
         input: JSON.stringify({ image_url: imageUrl, num_layers: layerCount }),
-        output: JSON.stringify(imageOutput),
+        output: JSON.stringify({}),
+        status: "processing",
       })
       .returning({ id: predictions.id });
 
-    // Store name prediction for audit
-    await db.insert(predictions).values({
-      projectId: project.id,
-      userId: context.session.user.id,
-      endpointId: NAME_ENDPOINT_ID,
-      input: JSON.stringify({ imageUrl, model: "gpt-4o-mini" }),
-      output: JSON.stringify({ name: generatedName }),
-      status: "completed",
-    });
-
-    // Link input blob to image prediction
+    // Link input blob to prediction
     await db.insert(predictionBlobs).values({
-      predictionId: imagePrediction.id,
+      predictionId: prediction.id,
       blobId: inputBlobId,
       role: "input",
       position: 0,
@@ -191,22 +104,22 @@ const createProject = createServerFn({ method: "POST" })
 
     if (!inputBlobRow) throw new Error("Input blob not found");
 
-    // Trigger background workflow to upload output blobs to R2
-    await env.UPLOAD_PREDICTION_BLOBS_WORKFLOW.create({
-      params: { predictionId: imagePrediction.id },
+    // Trigger background workflow
+    await env.GENERATE_PROJECT_WORKFLOW.create({
+      params: {
+        projectId: project.id,
+        predictionId: prediction.id,
+        imageUrl,
+        layerCount,
+      },
     });
 
     return {
       id: project.id,
-      name: generatedName,
+      name: null,
+      status: "processing",
       inputBlob: toPublicBlob(inputBlobRow),
-      outputBlobs: imageOutput.images.map((img, idx) => ({
-        id: `fal-${idx}`,
-        url: img.url,
-        contentType: "image/png",
-        width: img.width,
-        height: img.height,
-      })),
+      outputBlobs: [],
       createdAt: project.createdAt,
     };
   });
@@ -252,12 +165,9 @@ const getProject = createServerFn({ method: "GET" })
     return {
       id: project.id,
       name: project.name,
+      status: project.status,
       inputBlob: toPublicBlob(inputBlobRow),
-      outputBlobs: getOutputBlobs({
-        outputBlobRows,
-        output: imagePrediction.output,
-        status: imagePrediction.status,
-      }),
+      outputBlobs: project.status === "completed" ? outputBlobRows.map(toPublicBlob) : [],
       createdAt: project.createdAt,
     };
   });
@@ -313,12 +223,9 @@ const listProjects = createServerFn({ method: "GET" }).handler(
         return {
           id: project.id,
           name: project.name,
+          status: project.status,
           inputBlob: toPublicBlob(inputBlobRow),
-          outputBlobs: getOutputBlobs({
-            outputBlobRows,
-            output: imagePrediction.output,
-            status: imagePrediction.status,
-          }),
+          outputBlobs: project.status === "completed" ? outputBlobRows.map(toPublicBlob) : [],
           createdAt: project.createdAt,
         };
       }),

@@ -15,6 +15,7 @@ const blobSchema = z.object({
 const projectSchema = z.object({
   id: z.string(),
   name: z.string().nullable(),
+  status: z.enum(["processing", "completed", "failed"]),
   inputBlob: blobSchema,
   outputBlobs: z.array(blobSchema),
   createdAt: z.date(),
