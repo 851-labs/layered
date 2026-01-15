@@ -14,14 +14,7 @@
     "head_sampling_rate": 1.0,
     "logs": {
       "enabled": true,
-      "head_sampling_rate": 1.0,
-      "persist": true,
       "invocation_logs": true,
-    },
-    "traces": {
-      "enabled": false,
-      "head_sampling_rate": 1.0,
-      "persist": true,
     },
   },
   "routes": [
