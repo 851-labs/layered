@@ -4,11 +4,16 @@
   "compatibility_date": "2025-12-10",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
-  "workers_dev": true,
   "preview_urls": true,
   "placement": {
     "mode": "smart",
   },
+  "routes": [
+    {
+      "pattern": "layered.851.sh",
+      "custom_domain": true,
+    },
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1.0,
@@ -17,15 +22,9 @@
       "invocation_logs": true,
     },
   },
-  "routes": [
-    {
-      "pattern": "layered.so",
-      "custom_domain": true,
-    },
-  ],
   "vars": {
-    "BETTER_AUTH_URL": "https://layered.so",
-    "R2_PUBLIC_URL": "https://layered.so/api/blobs",
+    "BETTER_AUTH_URL": "https://layered.851.sh",
+    "R2_PUBLIC_URL": "https://layered.851.sh/api/blobs",
   },
   "d1_databases": [
     {
