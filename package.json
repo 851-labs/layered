@@ -21,8 +21,6 @@
     "db:migrations:apply:prod": "bun --filter=@layered/web db:migrations:apply:prod"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
     "lefthook": "^2.0.14",
     "oxfmt": "^0.23.0",
     "oxlint": "^1.38.0",
